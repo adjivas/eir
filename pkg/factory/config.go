@@ -17,8 +17,8 @@ const (
 	UdrDefaultTLSKeyLogPath  = "./log/udrsslkey.log"
 	UdrDefaultCertPemPath    = "./cert/udr.pem"
 	UdrDefaultPrivateKeyPath = "./cert/udr.key"
-	UdrDefaultConfigPath     = "./config/udrcfg.yaml"
-	UdrSbiDefaultIPv4        = "127.0.0.9"
+	UdrDefaultConfigPath     = "./config/eircfg.yaml"
+	UdrSbiDefaultIPv4        = "127.0.0.7"
 	UdrSbiDefaultPort        = 8000
 	UdrSbiDefaultScheme      = "https"
 	UdrDefaultNrfUri         = "https://127.0.0.10:8000"
