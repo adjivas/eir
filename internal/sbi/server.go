@@ -11,7 +11,6 @@ import (
 
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/internal/sbi/processor"
 	"github.com/free5gc/udr/internal/util"
 	"github.com/free5gc/udr/pkg/app"
 	"github.com/free5gc/udr/pkg/factory"
@@ -28,8 +27,6 @@ type Server struct {
 
 type UDR interface {
 	app.App
-
-	Processor() *processor.Processor
 }
 
 func NewServer(udr UDR, tlsKeyLogPath string) *Server {

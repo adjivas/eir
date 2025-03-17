@@ -15,7 +15,6 @@ import (
 	"github.com/free5gc/openapi/models"
 	db "github.com/free5gc/udr/internal/database"
 	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/internal/sbi/processor"
 	"github.com/free5gc/udr/pkg/factory"
 	util_logger "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/mongoapi"
@@ -47,9 +46,6 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 		Config().
 		Return(factory.UdrConfig).
 		AnyTimes()
-
-	processor := processor.NewProcessor(udr)
-	udr.EXPECT().Processor().Return(processor).AnyTimes()
 
 	s := NewServer(udr, "")
 	dataRepositoryRoutes := s.getDataRepositoryRoutes()

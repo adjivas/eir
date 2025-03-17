@@ -68,12 +68,9 @@ func (s *Server) HandleAmfContext3gpp(c *gin.Context) {
 	}
 
 	logger.DataRepoLog.Tracef("Handle AmfContext3gpp")
-	collName := "subscriptionData.contextData.amf3gppAccess"
 	ueId := c.Params.ByName("ueId")
 	if ueId == "" {
 		util.EmptyUeIdProblemJson(c)
 		return
 	}
-
-	s.Processor().AmfContext3gppProcedure(c, collName, ueId, patchItemArray)
 }

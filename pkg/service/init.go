@@ -16,7 +16,6 @@ import (
 	"github.com/free5gc/udr/internal/logger"
 	"github.com/free5gc/udr/internal/sbi"
 	"github.com/free5gc/udr/internal/sbi/consumer"
-	"github.com/free5gc/udr/internal/sbi/processor"
 	"github.com/free5gc/udr/pkg/app"
 	"github.com/free5gc/udr/pkg/factory"
 	"github.com/free5gc/util/mongoapi"
@@ -31,7 +30,6 @@ type UdrApp struct {
 
 	wg        sync.WaitGroup
 	sbiServer *sbi.Server
-	processor *processor.Processor
 	consumer  *consumer.Consumer
 }
 
@@ -51,9 +49,6 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ud
 	udr.SetLogLevel(cfg.GetLogLevel())
 	udr.SetReportCaller(cfg.GetLogReportCaller())
 
-	processor := processor.NewProcessor(udr)
-	udr.processor = processor
-
 	consumer := consumer.NewConsumer(udr)
 	udr.consumer = consumer
 
@@ -64,10 +59,6 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ud
 
 func (a *UdrApp) Consumer() *consumer.Consumer {
 	return a.consumer
-}
-
-func (a *UdrApp) Processor() *processor.Processor {
-	return a.processor
 }
 
 func (a *UdrApp) Config() *factory.Config {

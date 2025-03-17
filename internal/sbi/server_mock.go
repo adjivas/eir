@@ -8,7 +8,6 @@ import (
 	reflect "reflect"
 
 	context "github.com/free5gc/udr/internal/context"
-	processor "github.com/free5gc/udr/internal/sbi/processor"
 	factory "github.com/free5gc/udr/pkg/factory"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -62,20 +61,6 @@ func (m *MockUDR) Context() *context.UDRContext {
 func (mr *MockUDRMockRecorder) Context() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Context", reflect.TypeOf((*MockUDR)(nil).Context))
-}
-
-// Processor mocks base method.
-func (m *MockUDR) Processor() *processor.Processor {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Processor")
-	ret0, _ := ret[0].(*processor.Processor)
-	return ret0
-}
-
-// Processor indicates an expected call of Processor.
-func (mr *MockUDRMockRecorder) Processor() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Processor", reflect.TypeOf((*MockUDR)(nil).Processor))
 }
 
 // SetLogEnable mocks base method.
