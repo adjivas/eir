@@ -30,7 +30,7 @@ func init() {
 	}
 
 	Log = logger_util.New(fieldsOrder)
-	NfLog = Log.WithField(logger_util.FieldNF, "UDR")
+	NfLog = Log.WithField(logger_util.FieldNF, "EIR")
 	MainLog = NfLog.WithField(logger_util.FieldCategory, "Main")
 	InitLog = NfLog.WithField(logger_util.FieldCategory, "Init")
 	CfgLog = NfLog.WithField(logger_util.FieldCategory, "CFG")

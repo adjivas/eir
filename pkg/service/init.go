@@ -12,18 +12,18 @@ import (
 
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/nrf/NFManagement"
-	udr_context "github.com/free5gc/udr/internal/context"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/internal/sbi"
-	"github.com/free5gc/udr/internal/sbi/consumer"
-	"github.com/free5gc/udr/pkg/app"
-	"github.com/free5gc/udr/pkg/factory"
+	eir_context "github.com/adjivas/eir/internal/context"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/internal/sbi"
+	"github.com/adjivas/eir/internal/sbi/consumer"
+	"github.com/adjivas/eir/pkg/app"
+	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/util/mongoapi"
 )
 
-type UdrApp struct {
+type EirApp struct {
 	cfg    *factory.Config
-	udrCtx *udr_context.UDRContext
+	eirCtx *eir_context.EIRContext
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -33,43 +33,43 @@ type UdrApp struct {
 	consumer  *consumer.Consumer
 }
 
-var _ app.App = &UdrApp{}
+var _ app.App = &EirApp{}
 
-func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*UdrApp, error) {
-	udr_context.Init()
+func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*EirApp, error) {
+	eir_context.Init()
 
-	udr := &UdrApp{
+	eir := &EirApp{
 		cfg:    cfg,
-		udrCtx: udr_context.GetSelf(),
+		eirCtx: eir_context.GetSelf(),
 		wg:     sync.WaitGroup{},
 	}
-	udr.ctx, udr.cancel = context.WithCancel(ctx)
+	eir.ctx, eir.cancel = context.WithCancel(ctx)
 
-	udr.SetLogEnable(cfg.GetLogEnable())
-	udr.SetLogLevel(cfg.GetLogLevel())
-	udr.SetReportCaller(cfg.GetLogReportCaller())
+	eir.SetLogEnable(cfg.GetLogEnable())
+	eir.SetLogLevel(cfg.GetLogLevel())
+	eir.SetReportCaller(cfg.GetLogReportCaller())
 
-	consumer := consumer.NewConsumer(udr)
-	udr.consumer = consumer
+	consumer := consumer.NewConsumer(eir)
+	eir.consumer = consumer
 
-	udr.sbiServer = sbi.NewServer(udr, tlsKeyLogPath)
+	eir.sbiServer = sbi.NewServer(eir, tlsKeyLogPath)
 
-	return udr, nil
+	return eir, nil
 }
 
-func (a *UdrApp) Consumer() *consumer.Consumer {
+func (a *EirApp) Consumer() *consumer.Consumer {
 	return a.consumer
 }
 
-func (a *UdrApp) Config() *factory.Config {
+func (a *EirApp) Config() *factory.Config {
 	return a.cfg
 }
 
-func (a *UdrApp) Context() *udr_context.UDRContext {
-	return a.udrCtx
+func (a *EirApp) Context() *eir_context.EIRContext {
+	return a.eirCtx
 }
 
-func (a *UdrApp) SetLogEnable(enable bool) {
+func (a *EirApp) SetLogEnable(enable bool) {
 	logger.MainLog.Infof("Log enable is set to [%v]", enable)
 	if enable && logger.Log.Out == os.Stderr {
 		return
@@ -84,7 +84,7 @@ func (a *UdrApp) SetLogEnable(enable bool) {
 	}
 }
 
-func (a *UdrApp) SetLogLevel(level string) {
+func (a *EirApp) SetLogLevel(level string) {
 	lvl, err := logrus.ParseLevel(level)
 	if err != nil {
 		logger.MainLog.Warnf("Log level [%s] is invalid", level)
@@ -98,7 +98,7 @@ func (a *UdrApp) SetLogLevel(level string) {
 	logger.Log.SetLevel(lvl)
 }
 
-func (a *UdrApp) SetReportCaller(reportCaller bool) {
+func (a *EirApp) SetReportCaller(reportCaller bool) {
 	logger.MainLog.Infof("Report Caller is set to [%v]", reportCaller)
 	if reportCaller == logger.Log.ReportCaller {
 		return
@@ -107,20 +107,20 @@ func (a *UdrApp) SetReportCaller(reportCaller bool) {
 	logger.Log.SetReportCaller(reportCaller)
 }
 
-func (u *UdrApp) registerToNrf(ctx context.Context) error {
-	udrContext := u.udrCtx
+func (u *EirApp) registerToNrf(ctx context.Context) error {
+	eirContext := u.eirCtx
 
-	nrfUri, nfId, err := u.consumer.SendRegisterNFInstance(ctx, udrContext.NrfUri)
+	nrfUri, nfId, err := u.consumer.SendRegisterNFInstance(ctx, eirContext.NrfUri)
 	if err != nil {
 		return fmt.Errorf("send register NFInstance error[%s]", err.Error())
 	}
-	udrContext.NrfUri = nrfUri
-	udrContext.NfId = nfId
+	eirContext.NrfUri = nrfUri
+	eirContext.NfId = nfId
 
 	return nil
 }
 
-func (a *UdrApp) deregisterFromNrf() {
+func (a *EirApp) deregisterFromNrf() {
 	err := a.consumer.SendDeregisterNFInstance()
 	if err != nil {
 		switch apiErr := err.(type) {
@@ -141,7 +141,7 @@ func (a *UdrApp) deregisterFromNrf() {
 	logger.InitLog.Infof("Deregister from NRF successfully")
 }
 
-func (a *UdrApp) Start() {
+func (a *EirApp) Start() {
 	err := a.registerToNrf(a.ctx)
 	if err != nil {
 		logger.InitLog.Errorf("register to NRF failed: %v", err)
@@ -151,14 +151,14 @@ func (a *UdrApp) Start() {
 
 	// get config file info
 	logger.InitLog.Infoln("Server started")
-	config := factory.UdrConfig
+	config := factory.EirConfig
 	mongodb := config.Configuration.Mongodb
 
-	logger.InitLog.Infof("UDR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
+	logger.InitLog.Infof("EIR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 
 	// Connect to MongoDB
 	if err := mongoapi.SetMongoDB(mongodb.Name, mongodb.Url); err != nil {
-		logger.InitLog.Errorf("UDR start set MongoDB error: %+v", err)
+		logger.InitLog.Errorf("EIR start set MongoDB error: %+v", err)
 		return
 	}
 
@@ -177,30 +177,30 @@ func (a *UdrApp) Start() {
 	a.WaitRoutineStopped()
 }
 
-func (a *UdrApp) listenShutdown(ctx context.Context) {
+func (a *EirApp) listenShutdown(ctx context.Context) {
 	defer a.wg.Done()
 
 	<-ctx.Done()
 	a.terminateProcedure()
 }
 
-func (a *UdrApp) Terminate() {
+func (a *EirApp) Terminate() {
 	a.cancel()
 }
 
-func (a *UdrApp) terminateProcedure() {
-	logger.MainLog.Infof("Terminating UDR...")
+func (a *EirApp) terminateProcedure() {
+	logger.MainLog.Infof("Terminating EIR...")
 	a.CallServerStop()
 	a.deregisterFromNrf()
 }
 
-func (a *UdrApp) CallServerStop() {
+func (a *EirApp) CallServerStop() {
 	if a.sbiServer != nil {
 		a.sbiServer.Shutdown()
 	}
 }
 
-func (a *UdrApp) WaitRoutineStopped() {
+func (a *EirApp) WaitRoutineStopped() {
 	a.wg.Wait()
-	logger.MainLog.Infof("UDR terminated")
+	logger.MainLog.Infof("EIR terminated")
 }

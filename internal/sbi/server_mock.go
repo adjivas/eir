@@ -7,36 +7,36 @@ package sbi
 import (
 	reflect "reflect"
 
-	context "github.com/free5gc/udr/internal/context"
-	factory "github.com/free5gc/udr/pkg/factory"
+	context "github.com/adjivas/eir/internal/context"
+	factory "github.com/adjivas/eir/pkg/factory"
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockUDR is a mock of UDR interface.
-type MockUDR struct {
+// MockEIR is a mock of EIR interface.
+type MockEIR struct {
 	ctrl     *gomock.Controller
-	recorder *MockUDRMockRecorder
+	recorder *MockEIRMockRecorder
 }
 
-// MockUDRMockRecorder is the mock recorder for MockUDR.
-type MockUDRMockRecorder struct {
-	mock *MockUDR
+// MockEIRMockRecorder is the mock recorder for MockEIR.
+type MockEIRMockRecorder struct {
+	mock *MockEIR
 }
 
-// NewMockUDR creates a new mock instance.
-func NewMockUDR(ctrl *gomock.Controller) *MockUDR {
-	mock := &MockUDR{ctrl: ctrl}
-	mock.recorder = &MockUDRMockRecorder{mock}
+// NewMockEIR creates a new mock instance.
+func NewMockEIR(ctrl *gomock.Controller) *MockEIR {
+	mock := &MockEIR{ctrl: ctrl}
+	mock.recorder = &MockEIRMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUDR) EXPECT() *MockUDRMockRecorder {
+func (m *MockEIR) EXPECT() *MockEIRMockRecorder {
 	return m.recorder
 }
 
 // Config mocks base method.
-func (m *MockUDR) Config() *factory.Config {
+func (m *MockEIR) Config() *factory.Config {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Config")
 	ret0, _ := ret[0].(*factory.Config)
@@ -44,81 +44,81 @@ func (m *MockUDR) Config() *factory.Config {
 }
 
 // Config indicates an expected call of Config.
-func (mr *MockUDRMockRecorder) Config() *gomock.Call {
+func (mr *MockEIRMockRecorder) Config() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Config", reflect.TypeOf((*MockUDR)(nil).Config))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Config", reflect.TypeOf((*MockEIR)(nil).Config))
 }
 
 // Context mocks base method.
-func (m *MockUDR) Context() *context.UDRContext {
+func (m *MockEIR) Context() *context.EIRContext {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Context")
-	ret0, _ := ret[0].(*context.UDRContext)
+	ret0, _ := ret[0].(*context.EIRContext)
 	return ret0
 }
 
 // Context indicates an expected call of Context.
-func (mr *MockUDRMockRecorder) Context() *gomock.Call {
+func (mr *MockEIRMockRecorder) Context() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Context", reflect.TypeOf((*MockUDR)(nil).Context))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Context", reflect.TypeOf((*MockEIR)(nil).Context))
 }
 
 // SetLogEnable mocks base method.
-func (m *MockUDR) SetLogEnable(enable bool) {
+func (m *MockEIR) SetLogEnable(enable bool) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetLogEnable", enable)
 }
 
 // SetLogEnable indicates an expected call of SetLogEnable.
-func (mr *MockUDRMockRecorder) SetLogEnable(enable interface{}) *gomock.Call {
+func (mr *MockEIRMockRecorder) SetLogEnable(enable interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogEnable", reflect.TypeOf((*MockUDR)(nil).SetLogEnable), enable)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogEnable", reflect.TypeOf((*MockEIR)(nil).SetLogEnable), enable)
 }
 
 // SetLogLevel mocks base method.
-func (m *MockUDR) SetLogLevel(level string) {
+func (m *MockEIR) SetLogLevel(level string) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetLogLevel", level)
 }
 
 // SetLogLevel indicates an expected call of SetLogLevel.
-func (mr *MockUDRMockRecorder) SetLogLevel(level interface{}) *gomock.Call {
+func (mr *MockEIRMockRecorder) SetLogLevel(level interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogLevel", reflect.TypeOf((*MockUDR)(nil).SetLogLevel), level)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogLevel", reflect.TypeOf((*MockEIR)(nil).SetLogLevel), level)
 }
 
 // SetReportCaller mocks base method.
-func (m *MockUDR) SetReportCaller(reportCaller bool) {
+func (m *MockEIR) SetReportCaller(reportCaller bool) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetReportCaller", reportCaller)
 }
 
 // SetReportCaller indicates an expected call of SetReportCaller.
-func (mr *MockUDRMockRecorder) SetReportCaller(reportCaller interface{}) *gomock.Call {
+func (mr *MockEIRMockRecorder) SetReportCaller(reportCaller interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetReportCaller", reflect.TypeOf((*MockUDR)(nil).SetReportCaller), reportCaller)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetReportCaller", reflect.TypeOf((*MockEIR)(nil).SetReportCaller), reportCaller)
 }
 
 // Start mocks base method.
-func (m *MockUDR) Start() {
+func (m *MockEIR) Start() {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Start")
 }
 
 // Start indicates an expected call of Start.
-func (mr *MockUDRMockRecorder) Start() *gomock.Call {
+func (mr *MockEIRMockRecorder) Start() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockUDR)(nil).Start))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockEIR)(nil).Start))
 }
 
 // Terminate mocks base method.
-func (m *MockUDR) Terminate() {
+func (m *MockEIR) Terminate() {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Terminate")
 }
 
 // Terminate indicates an expected call of Terminate.
-func (mr *MockUDRMockRecorder) Terminate() *gomock.Call {
+func (mr *MockEIRMockRecorder) Terminate() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Terminate", reflect.TypeOf((*MockUDR)(nil).Terminate))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Terminate", reflect.TypeOf((*MockEIR)(nil).Terminate))
 }

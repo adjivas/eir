@@ -1,5 +1,5 @@
 /*
- * UDR Configuration Factory
+ * EIR Configuration Factory
  */
 
 package factory
@@ -11,16 +11,16 @@ import (
 	"github.com/asaskevich/govalidator"
 	"gopkg.in/yaml.v2"
 
-	"github.com/free5gc/udr/internal/logger"
+	"github.com/adjivas/eir/internal/logger"
 )
 
-var UdrConfig *Config
+var EirConfig *Config
 
 // TODO: Support configuration update from REST api
 func InitConfigFactory(f string, cfg *Config) error {
 	if f == "" {
 		// Use default config path
-		f = UdrDefaultConfigPath
+		f = EirDefaultConfigPath
 	}
 	if content, err := os.ReadFile(f); err != nil {
 		return fmt.Errorf("[Factory] %+v", err)

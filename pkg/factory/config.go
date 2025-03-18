@@ -1,5 +1,5 @@
 /*
- * UDR Configuration Factory
+ * EIR Configuration Factory
  */
 
 package factory
@@ -10,20 +10,20 @@ import (
 
 	"github.com/asaskevich/govalidator"
 
-	"github.com/free5gc/udr/internal/logger"
+	"github.com/adjivas/eir/internal/logger"
 )
 
 const (
-	UdrDefaultTLSKeyLogPath  = "./log/udrsslkey.log"
-	UdrDefaultCertPemPath    = "./cert/udr.pem"
-	UdrDefaultPrivateKeyPath = "./cert/udr.key"
-	UdrDefaultConfigPath     = "./config/eircfg.yaml"
-	UdrSbiDefaultIPv4        = "127.0.0.7"
-	UdrSbiDefaultPort        = 8000
-	UdrSbiDefaultScheme      = "https"
-	UdrDefaultNrfUri         = "https://127.0.0.10:8000"
-	UdrDrResUriPrefix        = "/nudr-dr/v2"
-	UdrGroupIdResUriPrefix   = "/nudr-group-id-map/v1"
+	EirDefaultTLSKeyLogPath  = "./log/eirsslkey.log"
+	EirDefaultCertPemPath    = "./cert/eir.pem"
+	EirDefaultPrivateKeyPath = "./cert/eir.key"
+	EirDefaultConfigPath     = "./config/eircfg.yaml"
+	EirSbiDefaultIPv4        = "127.0.0.7"
+	EirSbiDefaultPort        = 8000
+	EirSbiDefaultScheme      = "https"
+	EirDefaultNrfUri         = "https://127.0.0.10:8000"
+	EirDrResUriPrefix        = "/n5g-eir-eic/v1"
+	EirGroupIdResUriPrefix   = "/n5g-group-id-map/v1"
 )
 
 type DbType string
@@ -52,9 +52,9 @@ type Info struct {
 }
 
 const (
-	UDR_DEFAULT_IPV4     = "127.0.0.4"
-	UDR_DEFAULT_PORT     = "8000"
-	UDR_DEFAULT_PORT_INT = 8000
+	EIR_DEFAULT_IPV4     = "127.0.0.4"
+	EIR_DEFAULT_PORT     = "8000"
+	EIR_DEFAULT_PORT_INT = 8000
 )
 
 type Configuration struct {

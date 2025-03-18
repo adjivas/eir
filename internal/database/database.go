@@ -4,9 +4,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/udr/internal/database/mongodb"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/pkg/factory"
+	"github.com/adjivas/eir/internal/database/mongodb"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/pkg/factory"
 )
 
 const (
@@ -27,7 +27,7 @@ type DbConnector interface {
 
 func NewDbConnector(dbName factory.DbType) DbConnector {
 	if dbName == DBCONNECTOR_TYPE_MONGODB {
-		return mongodb.NewMongoDbConnector(factory.UdrConfig.Configuration.Mongodb)
+		return mongodb.NewMongoDbConnector(factory.EirConfig.Configuration.Mongodb)
 	} else {
 		logger.DbLog.Fatalf("Unsupported database type: %s", dbName)
 		return nil

@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/free5gc/openapi/models"
-	db "github.com/free5gc/udr/internal/database"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/pkg/factory"
+	db "github.com/adjivas/eir/internal/database"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/pkg/factory"
 	util_logger "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/mongoapi"
 )
@@ -27,12 +27,12 @@ type testdata struct {
 
 func setupHttpServer(t *testing.T) *gin.Engine {
 	router := util_logger.NewGinWithLogrus(logger.GinLog)
-	dataRepositoryGroup := router.Group(factory.UdrDrResUriPrefix)
+	dataRepositoryGroup := router.Group(factory.EirDrResUriPrefix)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	udr := NewMockUDR(ctrl)
-	factory.UdrConfig = &factory.Config{
+	eir := NewMockEIR(ctrl)
+	factory.EirConfig = &factory.Config{
 		Configuration: &factory.Configuration{
 			DbConnectorType: "mongodb",
 			Mongodb:         &factory.Mongodb{},
@@ -42,12 +42,12 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 			},
 		},
 	}
-	udr.EXPECT().
+	eir.EXPECT().
 		Config().
-		Return(factory.UdrConfig).
+		Return(factory.EirConfig).
 		AnyTimes()
 
-	s := NewServer(udr, "")
+	s := NewServer(eir, "")
 	dataRepositoryRoutes := s.getDataRepositoryRoutes()
 	AddService(dataRepositoryGroup, dataRepositoryRoutes)
 	return router
@@ -138,47 +138,47 @@ func delUri(t *testing.T, baseUri, extUri string) *httptest.ResponseRecorder {
 	return rsp
 }
 
-func TestUDR_Root(t *testing.T) {
+func TestEIR_Root(t *testing.T) {
 	server := setupHttpServer(t)
-	reqUri := factory.UdrDrResUriPrefix + "/"
+	reqUri := factory.EirDrResUriPrefix + "/"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	t.Run("UDR Root", func(t *testing.T) {
+	t.Run("EIR Root", func(t *testing.T) {
 		require.Equal(t, http.StatusNotImplemented, rsp.Code)
 		require.Equal(t, "Hello World!", rsp.Body.String())
 	})
 }
 
-func TestUDR_GetSubs2Notify_GetBeforeCreateingOne(t *testing.T) {
+func TestEIR_GetSubs2Notify_GetBeforeCreateingOne(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping testing in short mode")
 	}
 
 	server := setupHttpServer(t)
-	reqUri := factory.UdrDrResUriPrefix + "/application-data/influenceData/subs-to-notify?dnn=internet"
+	reqUri := factory.EirDrResUriPrefix + "/application-data/influenceData/subs-to-notify?dnn=internet"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	t.Run("UDR subs-to-notify Get before Create, dnn==internet", func(t *testing.T) {
+	t.Run("EIR subs-to-notify Get before Create, dnn==internet", func(t *testing.T) {
 		require.Equal(t, http.StatusOK, rsp.Code)
 		require.Equal(t, "null", rsp.Body.String())
 	})
 }
 
-func TestUDR_GetSubs2Notify_CreateThenGet(t *testing.T) {
+func TestEIR_GetSubs2Notify_CreateThenGet(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping testing in short mode")
 	}
 
 	server := setupHttpServer(t)
-	baseUri := factory.UdrDrResUriPrefix + "/application-data/influenceData/subs-to-notify"
+	baseUri := factory.EirDrResUriPrefix + "/application-data/influenceData/subs-to-notify"
 	reqUri := baseUri
 
 	test := models.TrafficInfluSub{
@@ -204,7 +204,7 @@ func TestUDR_GetSubs2Notify_CreateThenGet(t *testing.T) {
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
-	t.Run("UDR subs-to-notify CreateThenGet - Create w/o mandatory notificationUri", func(t *testing.T) {
+	t.Run("EIR subs-to-notify CreateThenGet - Create w/o mandatory notificationUri", func(t *testing.T) {
 		require.Equal(t, http.StatusBadRequest, rsp.Code)
 	})
 
@@ -220,55 +220,55 @@ func TestUDR_GetSubs2Notify_CreateThenGet(t *testing.T) {
 	// require.Nil(t, err)
 	// require.NotNil(t, location)
 	// t.Log("location:", location)
-	t.Run("UDR subs-to-notify CreateThenGet - Create normal case", func(t *testing.T) {
+	t.Run("EIR subs-to-notify CreateThenGet - Create normal case", func(t *testing.T) {
 		require.Equal(t, http.StatusCreated, rsp.Code)
 		require.Equal(t, string(bjson), rsp.Body.String())
 		// require.True(t, strings.Contains(location, baseUri+"/"))
-		// require.True(t, strings.HasPrefix(location, udr_context.GetSelf().GetIPv4Uri()+baseUri+"/"))
+		// require.True(t, strings.HasPrefix(location, eir_context.GetSelf().GetIPv4Uri()+baseUri+"/"))
 	})
 
 	// Get success
 	rsp = getUri(t, baseUri, "?dnn=internet")
-	t.Run("UDR subs-to-notify CreateThenGet - get", func(t *testing.T) {
+	t.Run("EIR subs-to-notify CreateThenGet - get", func(t *testing.T) {
 		require.Equal(t, http.StatusOK, rsp.Code)
 		require.Equal(t, "["+string(bjson)+"]", rsp.Body.String())
 	})
 
 	// Get without a filter
 	rsp = getUri(t, baseUri, "")
-	t.Run("UDR subs-to-notify CreateThenGet - get w/o a filter", func(t *testing.T) {
+	t.Run("EIR subs-to-notify CreateThenGet - get w/o a filter", func(t *testing.T) {
 		require.Equal(t, http.StatusBadRequest, rsp.Code)
 	})
 
 	// Get a non-exist DNN
 	rsp = getUri(t, baseUri, "?dnn=ThisIsABadDNN")
-	t.Run("UDR subs-to-notify CreateThenGet - get bad DNN", func(t *testing.T) {
+	t.Run("EIR subs-to-notify CreateThenGet - get bad DNN", func(t *testing.T) {
 		require.Equal(t, http.StatusOK, rsp.Code)
 		require.Equal(t, "null", rsp.Body.String())
 	})
 }
 
-func TestUDR_InfluData_GetBeforeCreateing(t *testing.T) {
+func TestEIR_InfluData_GetBeforeCreateing(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping testing in short mode")
 	}
 
 	server := setupHttpServer(t)
-	reqUri := factory.UdrDrResUriPrefix + "/application-data/influenceData"
+	reqUri := factory.EirDrResUriPrefix + "/application-data/influenceData"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	t.Run("UDR influ-data Get before Create",
+	t.Run("EIR influ-data Get before Create",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, "[1]", rsp.Body.String())
 		})
 }
 
-func TestUDR_InfluData_CreateThenGet(t *testing.T) {
+func TestEIR_InfluData_CreateThenGet(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping testing in short mode")
 	}
@@ -276,14 +276,14 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	// PUT, PATCH, DELETE
 	setupMongoDB(t)
 	server := setupHttpServer(t)
-	baseUri := factory.UdrDrResUriPrefix + "/application-data/influenceData"
+	baseUri := factory.EirDrResUriPrefix + "/application-data/influenceData"
 	td1 := testdata{"/influenceId0001", "imsi-208930000000001"}
 	td2 := testdata{"/influenceId0002", "imsi-208930000000002"}
 
 	// Create one - bad method (POST not allowed)
 	influData := getInfluData(td1.supi)
 	rsp, _ := postInfluData(t, baseUri, td1.influId, influData)
-	t.Run("UDR influ-data CreateThenGet - Create one - bad method",
+	t.Run("EIR influ-data CreateThenGet - Create one - bad method",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusMethodNotAllowed, rsp.Code)
 		})
@@ -291,7 +291,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	// Create one - normal
 	influData = getInfluData(td1.supi)
 	rsp, bjson := putInfluData(t, baseUri, td1.influId, influData)
-	t.Run("UDR influ-data CreateThenGet - Create normal case",
+	t.Run("EIR influ-data CreateThenGet - Create normal case",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusCreated, rsp.Code)
 			require.Equal(t, string(bjson), rsp.Body.String())
@@ -300,7 +300,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	// Create one - update existing one with identical data
 	influData = getInfluData(td1.supi)
 	rsp, bjson = putInfluData(t, baseUri, td1.influId, influData)
-	t.Run("UDR influ-data CreateThenGet - Create - update existing one-identical data",
+	t.Run("EIR influ-data CreateThenGet - Create - update existing one-identical data",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, string(bjson), rsp.Body.String())
@@ -310,7 +310,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	influData = getInfluData(td1.supi)
 	influData.Snssai.Sst = 2
 	rsp, bjson = putInfluData(t, baseUri, td1.influId, influData)
-	t.Run("UDR influ-data CreateThenGet - Create - update existing one-with some difference",
+	t.Run("EIR influ-data CreateThenGet - Create - update existing one-with some difference",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, string(bjson), rsp.Body.String())
@@ -329,7 +329,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	// require.Nil(t, err)
 	// rsp = httptest.NewRecorder()
 	// server.ServeHTTP(rsp, req)
-	// t.Run("UDR influ-data CreateThenGet - Patch - update existing one-with some difference",
+	// t.Run("EIR influ-data CreateThenGet - Patch - update existing one-with some difference",
 	// 	func(t *testing.T) {
 	// 		require.Equal(t, http.StatusNoContent, rsp.Code)
 	// 		require.Equal(t, string(bjson), rsp.Body.String())
@@ -340,7 +340,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	testRsp := []models.TrafficInfluData{}
 	err := json.Unmarshal(rsp.Body.Bytes(), &testRsp)
 	require.Nil(t, err)
-	t.Run("UDR influ-data CreateThenGet - get",
+	t.Run("EIR influ-data CreateThenGet - get",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, influData.Dnn, testRsp[0].Dnn)
@@ -351,7 +351,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	// Create with td2 - normal
 	influData = getInfluData(td2.supi)
 	rsp, bjson = putInfluData(t, baseUri, td2.influId, influData)
-	t.Run("UDR influ-data CreateThenGet - Create normal case",
+	t.Run("EIR influ-data CreateThenGet - Create normal case",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusCreated, rsp.Code)
 			require.Equal(t, string(bjson), rsp.Body.String())
@@ -362,7 +362,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	err = json.Unmarshal(rsp.Body.Bytes(), &testRsp)
 	t.Log(rsp.Body.String())
 	require.Nil(t, err)
-	t.Run("UDR influ-data CreateThenGet - get - 2 influData",
+	t.Run("EIR influ-data CreateThenGet - get - 2 influData",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, 2, len(testRsp))
@@ -372,7 +372,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	rsp = getUri(t, baseUri, "?Supi=BadSupi")
 	err = json.Unmarshal(rsp.Body.Bytes(), &testRsp)
 	require.Nil(t, err)
-	t.Run("UDR influ-data CreateThenGet - Bad DNN",
+	t.Run("EIR influ-data CreateThenGet - Bad DNN",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			// expect zero influData
@@ -385,7 +385,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	require.Nil(t, err)
 	rsp = httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
-	t.Run("UDR influ-data CreateThenGet - Delete td2",
+	t.Run("EIR influ-data CreateThenGet - Delete td2",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusNoContent, rsp.Code)
 		})
@@ -395,7 +395,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	err = json.Unmarshal(rsp.Body.Bytes(), &testRsp)
 	t.Log(rsp.Body.String())
 	require.Nil(t, err)
-	t.Run("UDR influ-data CreateThenGet - get - 1 influData left",
+	t.Run("EIR influ-data CreateThenGet - get - 1 influData left",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, 1, len(testRsp))
@@ -403,7 +403,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 
 	// Delete td1
 	rsp = delUri(t, baseUri, td1.influId)
-	t.Run("UDR influ-data CreateThenGet - Delete td1",
+	t.Run("EIR influ-data CreateThenGet - Delete td1",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusNoContent, rsp.Code)
 		})
@@ -413,7 +413,7 @@ func TestUDR_InfluData_CreateThenGet(t *testing.T) {
 	err = json.Unmarshal(rsp.Body.Bytes(), &testRsp)
 	t.Log(rsp.Body.String())
 	require.Nil(t, err)
-	t.Run("UDR influ-data CreateThenGet - get - all influData deleted",
+	t.Run("EIR influ-data CreateThenGet - get - all influData deleted",
 		func(t *testing.T) {
 			require.Equal(t, http.StatusOK, rsp.Code)
 			require.Equal(t, 0, len(testRsp))

@@ -6,7 +6,7 @@ import (
 	"github.com/free5gc/openapi/models"
 )
 
-// Title in ProblemDetails for UDR HTTP APIs
+// Title in ProblemDetails for EIR HTTP APIs
 const (
 	INVALID_REQUEST       = "Invalid request message framing"
 	MALFORMED_REQUEST     = "Malformed request syntax"

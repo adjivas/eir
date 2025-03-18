@@ -1,5 +1,5 @@
 /*
- * UDR Utility - List
+ * EIR Utility - List
  *
  * Copy from NSSF and NEF utility
  */

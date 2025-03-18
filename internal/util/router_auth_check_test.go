@@ -16,13 +16,13 @@ const (
 	Invalid = "invalid"
 )
 
-type mockUDRContext struct{}
+type mockEIRContext struct{}
 
-func newMockUDRContext() *mockUDRContext {
-	return &mockUDRContext{}
+func newMockEIRContext() *mockEIRContext {
+	return &mockEIRContext{}
 }
 
-func (m *mockUDRContext) AuthorizationCheck(token string, serviceName models.ServiceName) error {
+func (m *mockEIRContext) AuthorizationCheck(token string, serviceName models.ServiceName) error {
 	if token == Valid {
 		return nil
 	}
@@ -84,7 +84,7 @@ func TestRouterAuthorizationCheck_Check(t *testing.T) {
 			c.Request.Header.Set("Authorization", tt.args.token)
 
 			rac := NewRouterAuthorizationCheck(models.ServiceName("testService"))
-			rac.Check(c, newMockUDRContext())
+			rac.Check(c, newMockEIRContext())
 			if w.Code != tt.want.statusCode {
 				t.Errorf("StatusCode should be %d, but got %d", tt.want.statusCode, w.Code)
 			}

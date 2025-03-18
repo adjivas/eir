@@ -2,7 +2,7 @@ package consumer
 
 import (
 	"github.com/free5gc/openapi/nrf/NFManagement"
-	"github.com/free5gc/udr/pkg/app"
+	"github.com/adjivas/eir/pkg/app"
 )
 
 type Consumer struct {
@@ -11,15 +11,15 @@ type Consumer struct {
 	*NrfService
 }
 
-func NewConsumer(udr app.App) *Consumer {
+func NewConsumer(eir app.App) *Consumer {
 	configuration := NFManagement.NewConfiguration()
-	configuration.SetBasePath(udr.Context().NrfUri)
+	configuration.SetBasePath(eir.Context().NrfUri)
 	nrfService := &NrfService{
 		nfMngmntClients: make(map[string]*NFManagement.APIClient),
 	}
 
 	return &Consumer{
-		App:        udr,
+		App:        eir,
 		NrfService: nrfService,
 	}
 }

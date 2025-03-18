@@ -1,4 +1,4 @@
-module github.com/free5gc/udr
+module github.com/adjivas/eir
 
 go 1.21
 

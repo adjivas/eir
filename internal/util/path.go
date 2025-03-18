@@ -1,8 +1,8 @@
 package util
 
 var (
-	UdrDefaultKeyLogPath = "./log/udrsslkey.log"
-	UdrDefaultPemPath    = "./config/TLS/udr.pem"
-	UdrDefaultKeyPath    = "./config/TLS/udr.key"
-	UdrDefaultConfigPath = "./config/eircfg.yaml"
+	EirDefaultKeyLogPath = "./log/eirsslkey.log"
+	EirDefaultPemPath    = "./config/TLS/eir.pem"
+	EirDefaultKeyPath    = "./config/TLS/eir.key"
+	EirDefaultConfigPath = "./config/eircfg.yaml"
 )

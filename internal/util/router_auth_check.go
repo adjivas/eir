@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/free5gc/openapi/models"
-	udr_context "github.com/free5gc/udr/internal/context"
-	"github.com/free5gc/udr/internal/logger"
+	eir_context "github.com/adjivas/eir/internal/context"
+	"github.com/adjivas/eir/internal/logger"
 )
 
 type RouterAuthorizationCheck struct {
@@ -20,9 +20,9 @@ func NewRouterAuthorizationCheck(serviceName models.ServiceName) *RouterAuthoriz
 	}
 }
 
-func (rac *RouterAuthorizationCheck) Check(c *gin.Context, udrContext udr_context.NFContext) {
+func (rac *RouterAuthorizationCheck) Check(c *gin.Context, eirContext eir_context.NFContext) {
 	token := c.Request.Header.Get("Authorization")
-	err := udrContext.AuthorizationCheck(token, rac.serviceName)
+	err := eirContext.AuthorizationCheck(token, rac.serviceName)
 	if err != nil {
 		logger.UtilLog.Debugf("RouterAuthorizationCheck: Check Unauthorized: %s", err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

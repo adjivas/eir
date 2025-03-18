@@ -1,5 +1,5 @@
 /*
- * Nudr_DataRepository API OpenAPI file
+ * N5g_DataRepository API OpenAPI file
  *
  * Unified Data Repository Service
  *
@@ -16,9 +16,9 @@ import (
 
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
-	// udr_context "github.com/free5gc/udr/internal/context"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/internal/util"
+	// eir_context "github.com/adjivas/eir/internal/context"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/internal/util"
 )
 
 func (s *Server) getDataRepositoryRoutes() []Route {
@@ -37,7 +37,7 @@ func Index(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "Hello World!")
 }
 
-// HTTPAmfContext3gpp - To modify the AMF context data of a UE using 3gpp access in the UDR
+// HTTPAmfContext3gpp - To modify the AMF context data of a UE using 3gpp access in the EIR
 func (s *Server) HandleAmfContext3gpp(c *gin.Context) {
 	var patchItemArray []models.PatchItem
 

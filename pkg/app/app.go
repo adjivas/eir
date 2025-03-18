@@ -1,8 +1,8 @@
 package app
 
 import (
-	udr_context "github.com/free5gc/udr/internal/context"
-	"github.com/free5gc/udr/pkg/factory"
+	eir_context "github.com/adjivas/eir/internal/context"
+	"github.com/adjivas/eir/pkg/factory"
 )
 
 type App interface {
@@ -13,6 +13,6 @@ type App interface {
 	Start()
 	Terminate()
 
-	Context() *udr_context.UDRContext
+	Context() *eir_context.EIRContext
 	Config() *factory.Config
 }

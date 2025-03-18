@@ -14,41 +14,41 @@ import (
 
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/oauth"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/pkg/factory"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/pkg/factory"
 )
 
-var udrContext = UDRContext{}
+var eirContext = EIRContext{}
 
 type subsId = string
 
-type UDRServiceType int
+type EIRServiceType int
 
 const (
-	NUDR_DR UDRServiceType = iota
+	N5G_DR EIRServiceType = iota
 )
 
 func Init() {
-	udrContext.Name = "udr"
-	udrContext.EeSubscriptionIDGenerator = 1
-	udrContext.SdmSubscriptionIDGenerator = 1
-	udrContext.SubscriptionDataSubscriptionIDGenerator = 1
-	udrContext.PolicyDataSubscriptionIDGenerator = 1
-	udrContext.SubscriptionDataSubscriptions = make(map[subsId]*models.SubscriptionDataSubscriptions)
-	udrContext.PolicyDataSubscriptions = make(map[subsId]*models.PolicyDataSubscription)
-	udrContext.InfluenceDataSubscriptionIDGenerator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
+	eirContext.Name = "eir"
+	eirContext.EeSubscriptionIDGenerator = 1
+	eirContext.SdmSubscriptionIDGenerator = 1
+	eirContext.SubscriptionDataSubscriptionIDGenerator = 1
+	eirContext.PolicyDataSubscriptionIDGenerator = 1
+	eirContext.SubscriptionDataSubscriptions = make(map[subsId]*models.SubscriptionDataSubscriptions)
+	eirContext.PolicyDataSubscriptions = make(map[subsId]*models.PolicyDataSubscription)
+	eirContext.InfluenceDataSubscriptionIDGenerator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 
 	serviceName := []models.ServiceName{
-		models.ServiceName_NUDR_DR,
+		models.ServiceName_N5G_EIR_EIC,
 	}
-	udrContext.NrfUri = fmt.Sprintf("%s://%s:%d", models.UriScheme_HTTPS, udrContext.RegisterIPv4, 29510)
-	initUdrContext()
+	eirContext.NrfUri = fmt.Sprintf("%s://%s:%d", models.UriScheme_HTTPS, eirContext.RegisterIPv4, 29510)
+	initEirContext()
 
-	config := factory.UdrConfig
-	udrContext.NfService = initNfService(serviceName, config.Info.Version)
+	config := factory.EirConfig
+	eirContext.NfService = initNfService(serviceName, config.Info.Version)
 }
 
-type UDRContext struct {
+type EIRContext struct {
 	Name                                    string
 	UriScheme                               models.UriScheme
 	BindingIPv4                             string
@@ -92,10 +92,10 @@ type NFContext interface {
 	AuthorizationCheck(token string, serviceName models.ServiceName) error
 }
 
-var _ NFContext = &UDRContext{}
+var _ NFContext = &EIRContext{}
 
-// Reset UDR Context
-func (context *UDRContext) Reset() {
+// Reset EIR Context
+func (context *EIRContext) Reset() {
 	context.UESubsCollection.Range(func(key, value interface{}) bool {
 		context.UESubsCollection.Delete(key)
 		return true
@@ -120,43 +120,43 @@ func (context *UDRContext) Reset() {
 	context.PolicyDataSubscriptionIDGenerator = 1
 	context.InfluenceDataSubscriptionIDGenerator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 	context.UriScheme = models.UriScheme_HTTPS
-	context.Name = "udr"
+	context.Name = "eir"
 }
 
-func initUdrContext() {
-	config := factory.UdrConfig
-	logger.UtilLog.Infof("udrconfig Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
+func initEirContext() {
+	config := factory.EirConfig
+	logger.UtilLog.Infof("eirconfig Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 	configuration := config.Configuration
-	udrContext.NfId = uuid.New().String()
-	udrContext.RegisterIPv4 = factory.UDR_DEFAULT_IPV4 // default localhost
-	udrContext.SBIPort = factory.UDR_DEFAULT_PORT_INT  // default port
+	eirContext.NfId = uuid.New().String()
+	eirContext.RegisterIPv4 = factory.EIR_DEFAULT_IPV4 // default localhost
+	eirContext.SBIPort = factory.EIR_DEFAULT_PORT_INT  // default port
 	if sbi := configuration.Sbi; sbi != nil {
-		udrContext.UriScheme = models.UriScheme(sbi.Scheme)
+		eirContext.UriScheme = models.UriScheme(sbi.Scheme)
 		if sbi.RegisterIPv4 != "" {
-			udrContext.RegisterIPv4 = sbi.RegisterIPv4
+			eirContext.RegisterIPv4 = sbi.RegisterIPv4
 		}
 		if sbi.Port != 0 {
-			udrContext.SBIPort = sbi.Port
+			eirContext.SBIPort = sbi.Port
 		}
 
-		udrContext.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
-		if udrContext.BindingIPv4 != "" {
+		eirContext.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
+		if eirContext.BindingIPv4 != "" {
 			logger.UtilLog.Info("Parsing ServerIPv4 address from ENV Variable.")
 		} else {
-			udrContext.BindingIPv4 = sbi.BindingIPv4
-			if udrContext.BindingIPv4 == "" {
+			eirContext.BindingIPv4 = sbi.BindingIPv4
+			if eirContext.BindingIPv4 == "" {
 				logger.UtilLog.Warn("Error parsing ServerIPv4 address as string. Using the 0.0.0.0 address as default.")
-				udrContext.BindingIPv4 = "0.0.0.0"
+				eirContext.BindingIPv4 = "0.0.0.0"
 			}
 		}
 	}
 	if configuration.NrfUri != "" {
-		udrContext.NrfUri = configuration.NrfUri
+		eirContext.NrfUri = configuration.NrfUri
 	} else {
 		logger.UtilLog.Warn("NRF Uri is empty! Using localhost as NRF IPv4 address.")
-		udrContext.NrfUri = fmt.Sprintf("%s://%s:%d", udrContext.UriScheme, "127.0.0.1", 29510)
+		eirContext.NrfUri = fmt.Sprintf("%s://%s:%d", eirContext.UriScheme, "127.0.0.1", 29510)
 	}
-	udrContext.NrfCertPem = configuration.NrfCertPem
+	eirContext.NrfCertPem = configuration.NrfCertPem
 }
 
 func initNfService(serviceName []models.ServiceName, version string) (
@@ -174,14 +174,14 @@ func initNfService(serviceName []models.ServiceName, version string) (
 					ApiVersionInUri: versionUri,
 				},
 			},
-			Scheme:          udrContext.UriScheme,
+			Scheme:          eirContext.UriScheme,
 			NfServiceStatus: models.NfServiceStatus_REGISTERED,
 			ApiPrefix:       GetIPv4Uri(),
 			IpEndPoints: []models.IpEndPoint{
 				{
-					Ipv4Address: udrContext.RegisterIPv4,
+					Ipv4Address: eirContext.RegisterIPv4,
 					Transport:   models.NrfNfManagementTransportProtocol_TCP,
-					Port:        int32(udrContext.SBIPort),
+					Port:        int32(eirContext.SBIPort),
 				},
 			},
 		}
@@ -191,15 +191,15 @@ func initNfService(serviceName []models.ServiceName, version string) (
 }
 
 func GetIPv4Uri() string {
-	return fmt.Sprintf("%s://%s:%d", udrContext.UriScheme, udrContext.RegisterIPv4, udrContext.SBIPort)
+	return fmt.Sprintf("%s://%s:%d", eirContext.UriScheme, eirContext.RegisterIPv4, eirContext.SBIPort)
 }
 
-func (context *UDRContext) GetIPv4GroupUri(udrServiceType UDRServiceType) string {
+func (context *EIRContext) GetIPv4GroupUri(eirServiceType EIRServiceType) string {
 	var serviceUri string
 
-	switch udrServiceType {
-	case NUDR_DR:
-		serviceUri = factory.UdrDrResUriPrefix
+	switch eirServiceType {
+	case N5G_DR:
+		serviceUri = factory.EirDrResUriPrefix
 	default:
 		serviceUri = ""
 	}
@@ -207,12 +207,12 @@ func (context *UDRContext) GetIPv4GroupUri(udrServiceType UDRServiceType) string
 	return fmt.Sprintf("%s://%s:%d%s", context.UriScheme, context.RegisterIPv4, context.SBIPort, serviceUri)
 }
 
-// Create new UDR context
-func GetSelf() *UDRContext {
-	return &udrContext
+// Create new EIR context
+func GetSelf() *EIRContext {
+	return &eirContext
 }
 
-func (context *UDRContext) NewAppDataInfluDataSubscriptionID() uint64 {
+func (context *EIRContext) NewAppDataInfluDataSubscriptionID() uint64 {
 	context.mtx.Lock()
 	defer context.mtx.Unlock()
 	context.appDataInfluDataSubscriptionIdGenerator++
@@ -226,22 +226,22 @@ func NewInfluenceDataSubscriptionId() string {
 	return fmt.Sprintf("%08x", GetSelf().InfluenceDataSubscriptionIDGenerator.Uint32())
 }
 
-func (c *UDRContext) GetTokenCtx(serviceName models.ServiceName, targetNF models.NrfNfManagementNfType) (
+func (c *EIRContext) GetTokenCtx(serviceName models.ServiceName, targetNF models.NrfNfManagementNfType) (
 	context.Context, *models.ProblemDetails, error,
 ) {
 	if !c.OAuth2Required {
 		return context.TODO(), nil, nil
 	}
-	return oauth.GetTokenCtx(models.NrfNfManagementNfType_UDR, targetNF,
+	return oauth.GetTokenCtx(models.NrfNfManagementNfType__5_G_EIR, targetNF,
 		c.NfId, c.NrfUri, string(serviceName))
 }
 
-func (c *UDRContext) AuthorizationCheck(token string, serviceName models.ServiceName) error {
+func (c *EIRContext) AuthorizationCheck(token string, serviceName models.ServiceName) error {
 	if !c.OAuth2Required {
-		logger.UtilLog.Debugf("UDRContext::AuthorizationCheck: OAuth2 not required\n")
+		logger.UtilLog.Debugf("EIRContext::AuthorizationCheck: OAuth2 not required\n")
 		return nil
 	}
 
-	logger.UtilLog.Debugf("UDRContext::AuthorizationCheck: token[%s] serviceName[%s]\n", token, serviceName)
+	logger.UtilLog.Debugf("EIRContext::AuthorizationCheck: token[%s] serviceName[%s]\n", token, serviceName)
 	return oauth.VerifyOAuth(token, string(serviceName), c.NrfCertPem)
 }

@@ -7,18 +7,18 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/free5gc/openapi/models"
-	udr_context "github.com/free5gc/udr/internal/context"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/pkg/factory"
+	eir_context "github.com/adjivas/eir/internal/context"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/pkg/factory"
 )
 
-func InitUdrContext(context *udr_context.UDRContext) {
-	config := factory.UdrConfig
-	logger.UtilLog.Infof("udrconfig Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
+func InitEirContext(context *eir_context.EIRContext) {
+	config := factory.EirConfig
+	logger.UtilLog.Infof("eirconfig Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 	configuration := config.Configuration
 	context.NfId = uuid.New().String()
-	context.RegisterIPv4 = factory.UDR_DEFAULT_IPV4 // default localhost
-	context.SBIPort = factory.UDR_DEFAULT_PORT_INT  // default port
+	context.RegisterIPv4 = factory.EIR_DEFAULT_IPV4 // default localhost
+	context.SBIPort = factory.EIR_DEFAULT_PORT_INT  // default port
 	if sbi := configuration.Sbi; sbi != nil {
 		context.UriScheme = models.UriScheme(sbi.Scheme)
 		if sbi.RegisterIPv4 != "" {

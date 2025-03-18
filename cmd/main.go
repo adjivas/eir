@@ -10,14 +10,14 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/pkg/factory"
-	"github.com/free5gc/udr/pkg/service"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/pkg/factory"
+	"github.com/adjivas/eir/pkg/service"
 	logger_util "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/version"
 )
 
-var UDR *service.UdrApp
+var EIR *service.EirApp
 
 func main() {
 	defer func() {
@@ -28,8 +28,8 @@ func main() {
 	}()
 
 	app := cli.NewApp()
-	app.Name = "udr"
-	app.Usage = "5G Unified Data Repository (UDR)"
+	app.Name = "eir"
+	app.Usage = "5G Unified Data Repository (EIR)"
 	app.Action = action
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -42,7 +42,7 @@ func main() {
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
-		logger.MainLog.Errorf("UDR Run error: %v\n", err)
+		logger.MainLog.Errorf("EIR Run error: %v\n", err)
 	}
 }
 
@@ -52,7 +52,7 @@ func action(cliCtx *cli.Context) error {
 		return err
 	}
 
-	logger.MainLog.Infoln("UDR version: ", version.GetVersion())
+	logger.MainLog.Infoln("EIR version: ", version.GetVersion())
 	ctx, cancel := context.WithCancel(context.Background())
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
@@ -66,14 +66,14 @@ func action(cliCtx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	factory.UdrConfig = cfg
-	udr, err := service.NewApp(ctx, cfg, tlsKeyLogPath)
+	factory.EirConfig = cfg
+	eir, err := service.NewApp(ctx, cfg, tlsKeyLogPath)
 	if err != nil {
 		return err
 	}
-	UDR = udr
+	EIR = eir
 
-	udr.Start()
+	eir.Start()
 
 	return nil
 }
@@ -95,7 +95,7 @@ func initLogFile(logNfPath []string) (string, error) {
 			logger.InitLog.Errorf("Make directory %s failed: %+v", tmpDir, err)
 			return "", err
 		}
-		_, name := filepath.Split(factory.UdrDefaultTLSKeyLogPath)
+		_, name := filepath.Split(factory.EirDefaultTLSKeyLogPath)
 		logTlsKeyPath = filepath.Join(tmpDir, name)
 	}
 

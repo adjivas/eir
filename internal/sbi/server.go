@@ -10,32 +10,32 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/internal/util"
-	"github.com/free5gc/udr/pkg/app"
-	"github.com/free5gc/udr/pkg/factory"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/internal/util"
+	"github.com/adjivas/eir/pkg/app"
+	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/util/httpwrapper"
 	logger_util "github.com/free5gc/util/logger"
 )
 
 type Server struct {
-	UDR
+	EIR
 
 	httpServer *http.Server
 	router     *gin.Engine
 }
 
-type UDR interface {
+type EIR interface {
 	app.App
 }
 
-func NewServer(udr UDR, tlsKeyLogPath string) *Server {
+func NewServer(eir EIR, tlsKeyLogPath string) *Server {
 	s := &Server{
-		UDR: udr,
+		EIR: eir,
 	}
 
 	s.router = newRouter(s)
-	server, err := bindRouter(udr, s.router, tlsKeyLogPath)
+	server, err := bindRouter(eir, s.router, tlsKeyLogPath)
 	s.httpServer = server
 
 	if err != nil {
@@ -81,8 +81,8 @@ func (s *Server) shutdownHttpServer() {
 	}
 }
 
-func bindRouter(udr app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Server, error) {
-	sbiConfig := udr.Config().Configuration.Sbi
+func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Server, error) {
+	sbiConfig := eir.Config().Configuration.Sbi
 	bindAddr := fmt.Sprintf("%s:%d", sbiConfig.BindingIPv4, sbiConfig.Port)
 
 	return httpwrapper.NewHttp2Server(bindAddr, tlsKeyLogPath, router)
@@ -91,16 +91,16 @@ func bindRouter(udr app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Se
 func newRouter(s *Server) *gin.Engine {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
 
-	dataRepositoryGroup := router.Group(factory.UdrDrResUriPrefix)
+	dataRepositoryGroup := router.Group(factory.EirDrResUriPrefix)
 	dataRepositoryGroup.Use(func(c *gin.Context) {
-		util.NewRouterAuthorizationCheck(models.ServiceName_NUDR_DR).Check(c, s.Context())
+		util.NewRouterAuthorizationCheck(models.ServiceName_N5G_EIR_EIC).Check(c, s.Context())
 	})
 	dataRepositoryRoutes := s.getDataRepositoryRoutes()
 	AddService(dataRepositoryGroup, dataRepositoryRoutes)
 
-	groupIdGroup := router.Group(factory.UdrGroupIdResUriPrefix)
+	groupIdGroup := router.Group(factory.EirGroupIdResUriPrefix)
 	groupIdGroup.Use(func(c *gin.Context) {
-		util.NewRouterAuthorizationCheck(models.ServiceName_NUDR_GROUP_ID_MAP).Check(c, s.Context())
+		util.NewRouterAuthorizationCheck(models.ServiceName_N5G_EIR_EIC).Check(c, s.Context())
 	})
 	groupIdRoutes := s.getGroupIdMap()
 	AddService(groupIdGroup, groupIdRoutes)
@@ -113,23 +113,23 @@ func (s *Server) unsecureServe() error {
 }
 
 func (s *Server) secureServe() error {
-	sbiConfig := s.UDR.Config()
+	sbiConfig := s.EIR.Config()
 
 	pemPath := sbiConfig.GetCertPemPath()
 	if pemPath == "" {
-		pemPath = factory.UdrDefaultCertPemPath
+		pemPath = factory.EirDefaultCertPemPath
 	}
 
 	keyPath := sbiConfig.GetCertKeyPath()
 	if keyPath == "" {
-		keyPath = factory.UdrDefaultPrivateKeyPath
+		keyPath = factory.EirDefaultPrivateKeyPath
 	}
 
 	return s.httpServer.ListenAndServeTLS(pemPath, keyPath)
 }
 
 func (s *Server) serve() error {
-	sbiConfig := s.UDR.Config().Configuration.Sbi
+	sbiConfig := s.EIR.Config().Configuration.Sbi
 
 	switch sbiConfig.Scheme {
 	case "http":

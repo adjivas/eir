@@ -7,9 +7,9 @@ import (
 
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/udr/internal/logger"
-	"github.com/free5gc/udr/internal/util"
-	"github.com/free5gc/udr/pkg/factory"
+	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/internal/util"
+	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/util/mongoapi"
 )
 
