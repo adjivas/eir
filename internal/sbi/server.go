@@ -88,6 +88,7 @@ func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Se
 	return httpwrapper.NewHttp2Server(bindAddr, tlsKeyLogPath, router)
 }
 
+// TODO ADJIVAS remove groups
 func newRouter(s *Server) *gin.Engine {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
 
@@ -97,13 +98,6 @@ func newRouter(s *Server) *gin.Engine {
 	})
 	dataRepositoryRoutes := s.getDataRepositoryRoutes()
 	AddService(dataRepositoryGroup, dataRepositoryRoutes)
-
-	groupIdGroup := router.Group(factory.EirGroupIdResUriPrefix)
-	groupIdGroup.Use(func(c *gin.Context) {
-		util.NewRouterAuthorizationCheck(models.ServiceName_N5G_EIR_EIC).Check(c, s.Context())
-	})
-	groupIdRoutes := s.getGroupIdMap()
-	AddService(groupIdGroup, groupIdRoutes)
 
 	return router
 }

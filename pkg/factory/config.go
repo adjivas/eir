@@ -23,7 +23,6 @@ const (
 	EirSbiDefaultScheme      = "https"
 	EirDefaultNrfUri         = "https://127.0.0.10:8000"
 	EirDrResUriPrefix        = "/n5g-eir-eic/v1"
-	EirGroupIdResUriPrefix   = "/n5g-group-id-map/v1"
 )
 
 type DbType string
