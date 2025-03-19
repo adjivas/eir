@@ -14,11 +14,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
-	// eir_context "github.com/adjivas/eir/internal/context"
+	// "github.com/free5gc/openapi"
+	// "github.com/free5gc/openapi/models"
+	// // eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/adjivas/eir/internal/util"
+	// "github.com/adjivas/eir/internal/util"
 )
 
 func (s *Server) getDataRepositoryRoutes() []Route {
@@ -29,6 +29,12 @@ func (s *Server) getDataRepositoryRoutes() []Route {
 			"/",
 			Index,
 		},
+		{
+			"EquipementStatus",
+			"GET",
+			"/equipement-status",
+			s.HandleQueryEirEquipementStatus,
+		},
 	}
 }
 
@@ -37,40 +43,8 @@ func Index(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "Hello World!")
 }
 
-// HTTPAmfContext3gpp - To modify the AMF context data of a UE using 3gpp access in the EIR
-func (s *Server) HandleAmfContext3gpp(c *gin.Context) {
-	var patchItemArray []models.PatchItem
+func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
+	logger.DataRepoLog.Tracef("Handle EirEquipementStatus")
 
-	requestBody, err := c.GetRawData()
-	if err != nil {
-		problemDetail := models.ProblemDetails{
-			Title:  "System failure",
-			Status: http.StatusInternalServerError,
-			Detail: err.Error(),
-			Cause:  "SYSTEM_FAILURE",
-		}
-		logger.DataRepoLog.Errorf("Get Request Body error: %+v", err)
-		c.JSON(http.StatusInternalServerError, problemDetail)
-		return
-	}
-
-	err = openapi.Deserialize(&patchItemArray, requestBody, "application/json")
-	if err != nil {
-		problemDetail := "[Request Body] " + err.Error()
-		rsp := models.ProblemDetails{
-			Title:  "Malformed request syntax",
-			Status: http.StatusBadRequest,
-			Detail: problemDetail,
-		}
-		logger.DataRepoLog.Errorln(problemDetail)
-		c.JSON(http.StatusBadRequest, rsp)
-		return
-	}
-
-	logger.DataRepoLog.Tracef("Handle AmfContext3gpp")
-	ueId := c.Params.ByName("ueId")
-	if ueId == "" {
-		util.EmptyUeIdProblemJson(c)
-		return
-	}
+	c.String(http.StatusNotImplemented, "Hello World 43!")
 }

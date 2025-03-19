@@ -88,7 +88,6 @@ func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Se
 	return httpwrapper.NewHttp2Server(bindAddr, tlsKeyLogPath, router)
 }
 
-// TODO ADJIVAS remove groups
 func newRouter(s *Server) *gin.Engine {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
 
