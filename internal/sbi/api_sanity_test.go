@@ -78,7 +78,7 @@ func TestEIR_Root(t *testing.T) {
 
 func TestEIR_EquipementStatus(t *testing.T) {
 	server := setupHttpServer(t)
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status"
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=43&supi=43&gpsi=43"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
@@ -86,6 +86,12 @@ func TestEIR_EquipementStatus(t *testing.T) {
 	server.ServeHTTP(rsp, req)
 
 	t.Run("EquipementStatus", func(t *testing.T) {
-		require.Equal(t, http.StatusNotImplemented, rsp.Code)
+		require.Equal(t, http.StatusNotFound, rsp.Code)
+		require.Equal(t, "{\"title\":\"Not found\",\"status\":404,\"detail\":\"Supi not found\",\"cause\":\"ERROR_EQUIPMENT_UNKNOWN\"}", rsp.Body.String())
 	})
+
+	// t.Run("EquipementStatus", func(t *testing.T) {
+	// 	require.Equal(t, http.StatusOK, rsp.Code)
+	// 	require.Equal(t, "{\"a\":43}", rsp.Body.String())
+	// })
 }

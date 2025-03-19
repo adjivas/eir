@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	// "github.com/free5gc/openapi"
-	// "github.com/free5gc/openapi/models"
+	"github.com/free5gc/openapi/models"
 	// // eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
 	// "github.com/adjivas/eir/internal/util"
@@ -46,5 +46,22 @@ func Index(c *gin.Context) {
 func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 	logger.DataRepoLog.Tracef("Handle EirEquipementStatus")
 
-	c.String(http.StatusNotImplemented, "Hello World 43!")
+	pei := c.Query("pei")
+	supi := c.Query("supi")
+	gpsi := c.Query("gpsi")
+	logger.MainLog.Infof("ADJIVAS Log enable is set to %v %v %v", pei, supi, gpsi)
+
+    // c.JSON(200, gin.H{
+    //     "status": "WHITELISTED",
+    // })
+    //
+
+	problemDetail := models.ProblemDetails{
+		Title: "Not found",
+		Status: http.StatusNotFound,
+		Detail: "Supi not found",
+		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
+	}
+	// logger.CallbackLog.Errorf("Get Request Body error: %+v", "Supi not found")
+	c.JSON(http.StatusNotFound, problemDetail)
 }

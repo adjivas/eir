@@ -21,6 +21,7 @@ var (
 	ProcLog     *logrus.Entry
 	SBILog      *logrus.Entry
 	DbLog       *logrus.Entry
+	CallbackLog *logrus.Entry
 )
 
 func init() {
@@ -43,4 +44,5 @@ func init() {
 	UtilLog = NfLog.WithField(logger_util.FieldCategory, "Util")
 	SBILog = NfLog.WithField(logger_util.FieldCategory, "SBI")
 	DbLog = NfLog.WithField(logger_util.FieldCategory, "DB")
+	CallbackLog = NfLog.WithField(logger_util.FieldCategory, "Callback")
 }
