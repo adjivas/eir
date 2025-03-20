@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -15,6 +16,11 @@ import (
 	"github.com/adjivas/eir/pkg/factory"
 	util_logger "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/mongoapi"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
 )
 
 type testdata struct {
@@ -76,7 +82,7 @@ func TestEIR_Root(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus(t *testing.T) {
+func TestEIR_EquipementStatus_NotFound(t *testing.T) {
 	server := setupHttpServer(t)
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=43&supi=43&gpsi=43"
 
@@ -94,4 +100,69 @@ func TestEIR_EquipementStatus(t *testing.T) {
 	// 	require.Equal(t, http.StatusOK, rsp.Code)
 	// 	require.Equal(t, "{\"a\":43}", rsp.Body.String())
 	// })
+}
+
+func TestEIR_EquipementStatus_Adjivas(t *testing.T) {
+	uri := "mongodb://localhost:27017"
+	// Use the SetServerAPIOptions() method to set the Stable API version to 1
+
+	// Create a new client and connect to the server
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+	// Send a ping to confirm a successful connection
+	var result bson.M
+	db := client.Database("free5gc")
+	if err := db.RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result); err != nil {
+		panic(err)
+	}
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+
+	// Create Collection
+	jsonSchema := bson.M{
+		"bsonType": "object",
+		"required": []string{"name", "age"},
+		"properties": bson.M{
+			"name": bson.M{
+				"bsonType": "string",
+				"enum": []string{"alex", "la"},
+				"description": "the name of the user, which is required and " +
+					"must be a string",
+			},
+			"age": bson.M{
+				"bsonType": "int",
+				"minimum":  18,
+				"description": "the age of the user, which is required and " +
+					"must be an integer >= 18",
+			},
+		},
+	}
+	validator := bson.M{
+		"$jsonSchema": jsonSchema,
+	}
+	opts := options.CreateCollection().SetValidator(validator)
+
+	err = db.CreateCollection(context.TODO(), "policyData.ues.eirData", opts)
+	if err != nil {
+		panic(err)
+	}
+
+	// Insert One Document
+	res, err := db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{"name": "alex", "age": 31})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("inserted document with ID %v\n", res.InsertedID)
+
+	// Drop Collection
+	err = db.Collection("policyData.ues.eirData").Drop(context.TODO())
+	if err != nil {
+		panic(err)
+	}
 }
