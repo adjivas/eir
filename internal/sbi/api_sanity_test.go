@@ -147,6 +147,7 @@ func TestEIR_EquipementStatus_DataBaseInsert(t *testing.T) {
 	db := setupMongoDB()
 
 	createEquipementStatus(db)
+	createEquipementStatus(db)
 
 	defer func() {
 		if err := db.Collection("policyData.ues.eirData").Drop(context.TODO()); err != nil {
