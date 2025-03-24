@@ -1,84 +1,86 @@
 package mongodb
 
 import (
-	"encoding/json"
+	"context"
+	"fmt"
+	// "go.mongodb.org/mongo-driver/bson"
 
-	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
-	"github.com/adjivas/eir/internal/logger"
-	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/free5gc/util/mongoapi"
+	mongo_driver "go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type MongoDbConnector struct {
-	*factory.Mongodb
+	Mongodb *mongo_driver.Database
 }
 
 func NewMongoDbConnector(mongo *factory.Mongodb) MongoDbConnector {
-	return MongoDbConnector{
-		Mongodb: mongo,
+	uri := mongo.Url
+	name := mongo.Name
+ 
+	// Create a new client and connect to the server
+	client, err := mongo_driver.Connect(options.Client().ApplyURI(uri))
+	if err != nil {
+		panic(err)
+	}
+	// Send a ping to confirm a successful connection
+	// var result bson.M
+	db := client.Database(name)
+	// if err := db.RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result); err != nil {
+	// 	panic(err)
+	// }
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+
+	return MongoDbConnector {
+		Mongodb: db,
 	}
 }
 
-func (m MongoDbConnector) PatchDataToDBAndNotify(
-	collName string, ueId string, patchItem []models.PatchItem, filter bson.M,
-) (origValue, newValue map[string]interface{}, err error) {
-	origValue, err = mongoapi.RestfulAPIGetOne(collName, filter)
-	if err != nil {
-		return
-	}
-
-	patchJSON, err := json.Marshal(patchItem)
-	if err != nil {
-		return
-	}
-
-	if err = mongoapi.RestfulAPIJSONPatch(collName, filter, patchJSON); err != nil {
-		return
-	}
-
-	newValue, err = mongoapi.RestfulAPIGetOne(collName, filter)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func (m MongoDbConnector) GetDataFromDB(
-	collName string, filter bson.M) (
-	map[string]interface{}, *models.ProblemDetails,
-) {
-	data, err := mongoapi.RestfulAPIGetOne(collName, filter)
-	if err != nil {
-		return nil, openapi.ProblemDetailsSystemFailure(err.Error())
-	}
-	if data == nil {
-		return nil, util.ProblemDetailsNotFound("DATA_NOT_FOUND")
-	}
-	return data, nil
-}
-
-func (m MongoDbConnector) GetDataFromDBWithArg(collName string, filter bson.M, strength int) (
-	map[string]interface{}, *models.ProblemDetails,
-) {
-	data, err := mongoapi.RestfulAPIGetOne(collName, filter, strength)
-	if err != nil {
-		return nil, openapi.ProblemDetailsSystemFailure(err.Error())
-	}
-	if data == nil {
-		logger.ConsumerLog.Errorln("filter: ", filter)
-		return nil, util.ProblemDetailsNotFound("DATA_NOT_FOUND")
-	}
-
-	return data, nil
-}
-
-func (m MongoDbConnector) DeleteDataFromDB(collName string, filter bson.M) {
-	if err := mongoapi.RestfulAPIDeleteOne(collName, filter); err != nil {
-		logger.DataRepoLog.Errorf("deleteDataFromDB: %+v", err)
+// func (m MongoDbConnector) createEquipementStatus(db *mongo.Database) (err error) {
+// 	jsonSchema := bson.M{
+// 		"bsonType": "object",
+// 		"required": []string{"pei", "equipement_status"},
+// 		"properties": bson.M{
+// 			"pei": bson.M{
+// 				"bsonType": "string",
+// 				"pattern": "^(imei-[0-9]{15}|imeisv-[0-9]{16}|mac((-[0-9a-fA-F]{2}){6})(-untrusted)?|eui((-[0-9a-fA-F]{2}){8}))$",
+// 				"description": "Data type representing the PEI of the UE",
+// 			},
+// 			"supi": bson.M{
+// 				"bsonType": "string",
+// 				"pattern": "^(imsi-[0-9]{5,15}|nai-.+|gci-.+|gli-.+)$",
+// 				"description": "Data type representing the SUPI of the subscriber",
+// 			},
+// 			"gpsi": bson.M{
+// 				"bsonType": "string",
+// 				"pattern": "^(msisdn-[0-9]{5,15}|extid-[^@]+@[^@]+)$",
+// 				"description": "Data type representing the GPSI of the subscriber",
+// 			},
+// 			"equipement_status": bson.M{
+// 				"bsonType": "string",
+// 				"enum": []string{"WHITELISTED", "BLACKLISTED", "GREYLISTED"},
+// 				"description": "Indicates the PEI is white, black or grey listed",
+// 			},
+// 		},
+// 	}
+// 	validator := bson.M{
+// 		"$jsonSchema": jsonSchema,
+// 	}
+// 	opts := options.CreateCollection().SetValidator(validator)
+//
+// 	if err := db.CreateCollection(context.TODO(), "policyData.ues.eirData", opts); err != nil {
+// 		return fmt.Errorf("Can't creates EquipementStatus[%s]", err.Error())
+// 	}
+// 	return nil
+// }
+//
+// func (m MongoDbConnector) dropEquipementStatus() {
+// 	if err := m.Mongodb.Collection("policyData.ues.eirData").Drop(context.TODO()); err != nil {
+// 		fmt.Errorf("Can't drops EquipementStatus[%s]", err.Error())
+// 	}
+// }
+func (m MongoDbConnector) dropEquipementStatus(db *mongo_driver.Database) {
+	if err := db.Collection("policyData.ues.eirData").Drop(context.TODO()); err != nil {
+		fmt.Errorf("Can't drops EquipementStatus[%s]", err.Error())
 	}
 }
