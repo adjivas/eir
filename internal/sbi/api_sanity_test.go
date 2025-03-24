@@ -46,8 +46,7 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 		AnyTimes()
 
 	s := NewServer(eir, "")
-	dataRepositoryRoutes := s.getDataRepositoryRoutes()
-	AddService(dataRepositoryGroup, dataRepositoryRoutes)
+	AddService(dataRepositoryGroup, s.getEquipementStatusRoutes())
 	return router
 }
 

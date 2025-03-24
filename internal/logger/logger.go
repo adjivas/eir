@@ -13,7 +13,7 @@ var (
 	InitLog     *logrus.Entry
 	CfgLog      *logrus.Entry
 	CtxLog      *logrus.Entry
-	DataRepoLog *logrus.Entry
+	EquipementStatusLog *logrus.Entry
 	UtilLog     *logrus.Entry
 	HttpLog     *logrus.Entry
 	ConsumerLog *logrus.Entry
@@ -38,7 +38,7 @@ func init() {
 	CtxLog = NfLog.WithField(logger_util.FieldCategory, "CTX")
 	GinLog = NfLog.WithField(logger_util.FieldCategory, "GIN")
 	ConsumerLog = NfLog.WithField(logger_util.FieldCategory, "Consumer")
-	DataRepoLog = NfLog.WithField(logger_util.FieldCategory, "DataRepo")
+	EquipementStatusLog = NfLog.WithField(logger_util.FieldCategory, "EquipementStatus")
 	ProcLog = NfLog.WithField(logger_util.FieldCategory, "Proc")
 	HttpLog = NfLog.WithField(logger_util.FieldCategory, "HTTP")
 	UtilLog = NfLog.WithField(logger_util.FieldCategory, "Util")

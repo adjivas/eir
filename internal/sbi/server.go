@@ -95,8 +95,7 @@ func newRouter(s *Server) *gin.Engine {
 	dataRepositoryGroup.Use(func(c *gin.Context) {
 		util.NewRouterAuthorizationCheck(models.ServiceName_N5G_EIR_EIC).Check(c, s.Context())
 	})
-	dataRepositoryRoutes := s.getDataRepositoryRoutes()
-	AddService(dataRepositoryGroup, dataRepositoryRoutes)
+	AddService(dataRepositoryGroup, s.getEquipementStatusRoutes())
 
 	return router
 }
