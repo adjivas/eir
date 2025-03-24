@@ -16,9 +16,9 @@ import (
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi"
 	"github.com/adjivas/eir/internal/sbi/consumer"
+	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/free5gc/util/mongoapi"
 )
 
 type EirApp struct {
@@ -30,6 +30,7 @@ type EirApp struct {
 
 	wg        sync.WaitGroup
 	sbiServer *sbi.Server
+	processor *processor.Processor
 	consumer  *consumer.Consumer
 }
 
@@ -48,6 +49,10 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 	eir.SetLogEnable(cfg.GetLogEnable())
 	eir.SetLogLevel(cfg.GetLogLevel())
 	eir.SetReportCaller(cfg.GetLogReportCaller())
+
+	logger.InitLog.Infof("ADJIVAS Processor")
+	processor := processor.NewProcessor(eir)
+	eir.processor = processor
 
 	consumer := consumer.NewConsumer(eir)
 	eir.consumer = consumer
@@ -154,13 +159,10 @@ func (a *EirApp) Start() {
 	config := factory.EirConfig
 	mongodb := config.Configuration.Mongodb
 
-	logger.InitLog.Infof("EIR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
+	logger.InitLog.Infof("ADJIVAS mongodb EIR ", mongodb.Name)
+	logger.InitLog.Infof("ADJIVAS mongodb EIR ", mongodb.Url)
 
-	// Connect to MongoDB
-	if err := mongoapi.SetMongoDB(mongodb.Name, mongodb.Url); err != nil {
-		logger.InitLog.Errorf("EIR start set MongoDB error: %+v", err)
-		return
-	}
+	logger.InitLog.Infof("EIR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 
 	// Graceful deregister when panic
 	defer func() {
