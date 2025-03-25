@@ -21,11 +21,12 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
+	"github.com/adjivas/eir/internal/sbi/processor"
 )
 
 func setupHttpServer(t *testing.T) *gin.Engine {
 	router := util_logger.NewGinWithLogrus(logger.GinLog)
-	dataRepositoryGroup := router.Group(factory.EirDrResUriPrefix)
+	equipementStatusGroup := router.Group(factory.EirDrResUriPrefix)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -45,8 +46,12 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 		Return(factory.EirConfig).
 		AnyTimes()
 
+	processor := processor.NewProcessor(eir)
+	eir.EXPECT().Processor().Return(processor).AnyTimes()
+
 	s := NewServer(eir, "")
-	AddService(dataRepositoryGroup, s.getEquipementStatusRoutes())
+	equipementStatusRoutes := s.getEquipementStatusRoutes()
+	AddService(equipementStatusGroup, equipementStatusRoutes)
 	return router
 }
 
@@ -145,7 +150,6 @@ func TestEIR_EquipementStatus_NotFound(t *testing.T) {
 func TestEIR_EquipementStatus_DataBaseInsert(t *testing.T) {
 	db := setupMongoDB()
 
-	createEquipementStatus(db)
 	createEquipementStatus(db)
 
 	defer func() {

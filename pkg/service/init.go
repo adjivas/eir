@@ -15,6 +15,7 @@ import (
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi"
+	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/sbi/consumer"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
@@ -30,6 +31,7 @@ type EirApp struct {
 
 	wg        sync.WaitGroup
 	sbiServer *sbi.Server
+	processor *processor.Processor
 	consumer  *consumer.Consumer
 }
 
@@ -49,6 +51,9 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 	eir.SetLogLevel(cfg.GetLogLevel())
 	eir.SetReportCaller(cfg.GetLogReportCaller())
 
+	processor := processor.NewProcessor(eir)
+	eir.processor = processor
+
 	consumer := consumer.NewConsumer(eir)
 	eir.consumer = consumer
 
@@ -59,6 +64,10 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 
 func (a *EirApp) Consumer() *consumer.Consumer {
 	return a.consumer
+}
+
+func (a *EirApp) Processor() *processor.Processor {
+	return a.processor
 }
 
 func (a *EirApp) Config() *factory.Config {
