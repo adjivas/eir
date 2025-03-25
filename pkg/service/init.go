@@ -157,10 +157,6 @@ func (a *EirApp) Start() {
 	// get config file info
 	logger.InitLog.Infoln("Server started")
 	config := factory.EirConfig
-	mongodb := config.Configuration.Mongodb
-
-	logger.InitLog.Infof("ADJIVAS mongodb EIR ", mongodb.Name)
-	logger.InitLog.Infof("ADJIVAS mongodb EIR ", mongodb.Url)
 
 	logger.InitLog.Infof("EIR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 

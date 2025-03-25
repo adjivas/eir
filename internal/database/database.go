@@ -1,17 +1,17 @@
 package database
 
 import (
-	// "go.mongodb.org/mongo-driver/v2/mongo"
-
 	"github.com/adjivas/eir/internal/database/mongodb"
+
 	"github.com/adjivas/eir/pkg/factory"
 )
 
 type DbConnector interface {
-	// createEquipementStatus(Mongodb *mongo.Database) (err error)
-	dropEquipementStatus()
+	HasEquipementStatus() (bool, error)
+	CreateEquipementStatus() (err error)
+	DropEquipementStatus() (err error)
 }
 
-func NewDbConnector() DbConnector {
+func NewDbConnector() (DbConnector, error) {
 	return mongodb.NewMongoDbConnector(factory.EirConfig.Configuration.Mongodb)
 }
