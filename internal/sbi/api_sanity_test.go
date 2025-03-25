@@ -65,17 +65,17 @@ func setupMongoDB() (*mongo.Database) {
 	}
 	// Send a ping to confirm a successful connection
 	var result bson.M
+	var ping bson.M = bson.M{"ping": 1}
 	db := client.Database("free5gc")
-	if err := db.RunCommand(context.TODO(), bson.D{{"ping", 1}}).Decode(&result); err != nil {
+	if err := db.RunCommand(context.TODO(), ping).Decode(&result); err != nil {
 		panic(err)
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 	return db
 }
 
-func createEquipementStatus(db *mongo.Database) {
-	// Create Collection
-	jsonSchema := bson.M{
+func schemaEquipementStatus() bson.M {
+	return bson.M{
 		"bsonType": "object",
 		"required": []string{"pei", "equipement_status"},
 		"properties": bson.M{
@@ -101,6 +101,11 @@ func createEquipementStatus(db *mongo.Database) {
 			},
 		},
 	}
+}
+
+func createEquipementStatus(db *mongo.Database) {
+	// Create Collection
+	jsonSchema := schemaEquipementStatus()
 	validator := bson.M{
 		"$jsonSchema": jsonSchema,
 	}
