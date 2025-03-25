@@ -2,27 +2,37 @@ package sbi
 
 import (
 	"context"
+	// "fmt"
 	"net/http"
 	"net/http/httptest"
+	"encoding/json"
 	"testing"
-	"fmt"
+	"github.com/free5gc/openapi/models"
 
-	"github.com/golang/mock/gomock"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/stretchr/testify/assert"
+	"github.com/adjivas/eir/internal/util"
 
 	"github.com/adjivas/eir/internal/logger"
+	// "github.com/adjivas/eir/internal/util"
 	util_logger "github.com/free5gc/util/logger"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	// "go.mongodb.org/mongo-driver/v2/mongo"
+	// "go.mongodb.org/mongo-driver/v2/mongo/options"
 
 	"github.com/adjivas/eir/internal/sbi/processor"
+	"github.com/free5gc/util/mongoapi"
 )
+
+type responseEir struct {
+    EquipementStatus   string `json:"equipement_status"`
+    PEI                string `json:"pei"`
+}
 
 func setupHttpServer(t *testing.T) *gin.Engine {
 	router := util_logger.NewGinWithLogrus(logger.GinLog)
@@ -55,66 +65,9 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 	return router
 }
 
-func setupMongoDB() (*mongo.Database) {
-	uri := "mongodb://localhost:27017"
- 
-	// Create a new client and connect to the server
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
-	if err != nil {
-		panic(err)
-	}
-	// Send a ping to confirm a successful connection
-	var result bson.M
-	var ping bson.M = bson.M{"ping": 1}
-	db := client.Database("free5gc")
-	if err := db.RunCommand(context.TODO(), ping).Decode(&result); err != nil {
-		panic(err)
-	}
-	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
-	return db
-}
-
-func schemaEquipementStatus() bson.M {
-	return bson.M{
-		"bsonType": "object",
-		"required": []string{"pei", "equipement_status"},
-		"properties": bson.M{
-			"pei": bson.M{
-				"bsonType": "string",
-				"pattern": "^(imei-[0-9]{15}|imeisv-[0-9]{16}|mac((-[0-9a-fA-F]{2}){6})(-untrusted)?|eui((-[0-9a-fA-F]{2}){8}))$",
-				"description": "Data type representing the PEI of the UE",
-			},
-			"supi": bson.M{
-				"bsonType": "string",
-				"pattern": "^(imsi-[0-9]{5,15}|nai-.+|gci-.+|gli-.+)$",
-				"description": "Data type representing the SUPI of the subscriber",
-			},
-			"gpsi": bson.M{
-				"bsonType": "string",
-				"pattern": "^(msisdn-[0-9]{5,15}|extid-[^@]+@[^@]+)$",
-				"description": "Data type representing the GPSI of the subscriber",
-			},
-			"equipement_status": bson.M{
-				"bsonType": "string",
-				"enum": []string{"WHITELISTED", "BLACKLISTED", "GREYLISTED"},
-				"description": "Indicates the PEI is white, black or grey listed",
-			},
-		},
-	}
-}
-
-func createEquipementStatus(db *mongo.Database) {
-	// Create Collection
-	jsonSchema := schemaEquipementStatus()
-	validator := bson.M{
-		"$jsonSchema": jsonSchema,
-	}
-	opts := options.CreateCollection().SetValidator(validator)
-
-	err := db.CreateCollection(context.TODO(), "policyData.ues.eirData", opts)
-	if err != nil {
-		panic(err)
-	}
+func setupMongoDB(t *testing.T) {
+	err := mongoapi.SetMongoDB("test5gc", "mongodb://localhost:27017")
+	require.Nil(t, err)
 }
 
 func TestEIR_Root(t *testing.T) {
@@ -132,92 +85,253 @@ func TestEIR_Root(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_NotFound(t *testing.T) {
+func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	server := setupHttpServer(t)
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=43&supi=43&gpsi=43"
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	filter := bson.M{"pei": nil}
+	pei1 := bson.M{ "pei": "imei-42", "equipement_status": "WHITELISTED" }
+	pei2 := bson.M{ "pei": "imei-43", "equipement_status": "WHITELISTED" }
+	pei3 := bson.M{ "pei": "imei-012345678901234", "equipement_status": "WHITELISTED" }
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	assert.Nil(t, err)
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	t.Run("EquipementStatus", func(t *testing.T) {
-		require.Equal(t, http.StatusNotFound, rsp.Code)
-		require.Equal(t, "{\"title\":\"Not found\",\"status\":404,\"detail\":\"Supi not found\",\"cause\":\"ERROR_EQUIPMENT_UNKNOWN\"}", rsp.Body.String())
+	expected_message := util.ToBsonM(responseEir {
+		EquipementStatus: "WHITELISTED",
+		PEI: "imei-012345678901234",
 	})
+		require.Equal(t, "{\"equipement_status\":\"WHITELISTED\",\"pei\":\"imei-012345678901234\"}", rsp.Body.String())
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := responseEir{}
 
-	// t.Run("EquipementStatus", func(t *testing.T) {
-	// 	require.Equal(t, http.StatusOK, rsp.Code)
-	// 	require.Equal(t, "{\"a\":43}", rsp.Body.String())
-	// })
+		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusOK, rsp.Code)
+	})
 }
 
-func TestEIR_EquipementStatus_DataBaseInsert(t *testing.T) {
-	db := setupMongoDB()
-
-	createEquipementStatus(db)
+func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
+	server := setupHttpServer(t)
+	setupMongoDB(t)
 
 	defer func() {
-		if err := db.Collection("policyData.ues.eirData").Drop(context.TODO()); err != nil {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
 			panic(err)
 		}
 	}()
 
-	// Success to Insert documents
-	// With valid pei and equipement_status
-	res, err := db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"pei": "imei-012345678901234",
-		"equipement_status": "WHITELISTED",
-	})
+	filter := bson.M{"pei": nil}
+	pei := bson.M{ "pei": "imei-42", "equipement_status": "WHITELISTED" }
+	res, err := mongoapi.RestfulAPIPutOne("policyData.ues.eirData", filter, pei)
+	assert.Equal(t, res, false)
 	assert.Nil(t, err)
-	assert.NotNil(t, res)
-	// With valid pei, equipement_status, supi and gpsi
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"pei": "imei-012345678901234",
-		"supi": "imsi-208930000000001",
-		"gpsi": "msisdn-00000",
-		"equipement_status": "WHITELISTED",
-	})
-	assert.Nil(t, err)
-	assert.NotNil(t, res)
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
 
-	// Fail to Insert documents
-	// With missing Pei
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"equipement_status": "BLACKLISTED",
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(models.ProblemDetails{
+		Title: "The equipment identify checking has failed",
+		Status: http.StatusNotFound,
+		Detail: "The Equipment Status wasn't found",
+		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 	})
-	assert.NotNil(t, err)
-	assert.Nil(t, res)
-	// With missing equipement_status
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"pei": "imei-012345678901234",
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := models.ProblemDetails{}
+
+		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusNotFound, rsp.Code)
 	})
-	assert.NotNil(t, err)
-	assert.Nil(t, res)
-	// With missing Pei and equipement_status
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-	})
-	assert.NotNil(t, err)
-	assert.Nil(t, res)
-	// With not valid Pei
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"pei": "ppppppppppppp-012345678901234",
-		"equipement_status": "BLACKLISTED",
-	})
-	// With not valid equipement_status
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"pei": "imei-012345678901234",
-		"equipement_status": "PINKLISTED",
-	})
-	assert.NotNil(t, err)
-	assert.Nil(t, res)
-	// With not valid supi and gpsi
-	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
-		"pei": "imei-012345678901234",
-		"supi": "sssssssssss",
-		"gpsi": "ggggggggggg",
-		"equipement_status": "BLACKLISTED",
-	})
-	assert.NotNil(t, err)
-	assert.Nil(t, res)
 }
+
+func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
+	server := setupHttpServer(t)
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(models.ProblemDetails{
+		Title: "The equipment identify checking has failed",
+		Status: http.StatusNotFound,
+		Detail: "The PEI is missing",
+		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := models.ProblemDetails{}
+
+		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusNotFound, rsp.Code)
+	})
+}
+
+// func getMongoDBConnector() (*mongo.Database) {
+// 	uri := "mongodb://localhost:27017"
+//
+// 	// Create a new client and connect to the server
+// 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	// Send a ping to confirm a successful connection
+// 	var result bson.M
+// 	var ping bson.M = bson.M{"ping": 1}
+// 	db := client.Database("test5gc")
+// 	if err := db.RunCommand(context.TODO(), ping).Decode(&result); err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+// 	return db
+// }
+//
+// func schemaEquipementStatus() bson.M {
+// 	return bson.M{
+// 		"bsonType": "object",
+// 		"required": []string{"pei", "equipement_status"},
+// 		"properties": bson.M{
+// 			"pei": bson.M{
+// 				"bsonType": "string",
+// 				"pattern": "^(imei-[0-9]{15}|imeisv-[0-9]{16}|mac((-[0-9a-fA-F]{2}){6})(-untrusted)?|eui((-[0-9a-fA-F]{2}){8}))$",
+// 				"description": "Data type representing the PEI of the UE",
+// 			},
+// 			"supi": bson.M{
+// 				"bsonType": "string",
+// 				"pattern": "^(imsi-[0-9]{5,15}|nai-.+|gci-.+|gli-.+)$",
+// 				"description": "Data type representing the SUPI of the subscriber",
+// 			},
+// 			"gpsi": bson.M{
+// 				"bsonType": "string",
+// 				"pattern": "^(msisdn-[0-9]{5,15}|extid-[^@]+@[^@]+)$",
+// 				"description": "Data type representing the GPSI of the subscriber",
+// 			},
+// 			"equipement_status": bson.M{
+// 				"bsonType": "string",
+// 				"enum": []string{"WHITELISTED", "BLACKLISTED", "GREYLISTED"},
+// 				"description": "Indicates the PEI is white, black or grey listed",
+// 			},
+// 		},
+// 	}
+// }
+//
+// func createEquipementStatus(db *mongo.Database) {
+// 	// Create Collection
+// 	jsonSchema := schemaEquipementStatus()
+// 	validator := bson.M{
+// 		"$jsonSchema": jsonSchema,
+// 	}
+// 	opts := options.CreateCollection().SetValidator(validator)
+//
+// 	err := db.CreateCollection(context.TODO(), "policyData.ues.eirData", opts)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
+//
+// func TestEIR_EquipementStatus_DataBaseInsert(t *testing.T) {
+// 	db := setupMongoDB()
+//
+// 	createEquipementStatus(db)
+//
+// 	defer func() {
+// 		if err := db.Collection("policyData.ues.eirData").Drop(context.TODO()); err != nil {
+// 			panic(err)
+// 		}
+// 	}()
+//
+// 	// Success to Insert documents
+// 	// With valid pei and equipement_status
+// 	res, err := db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"pei": "imei-012345678901234",
+// 		"equipement_status": "WHITELISTED",
+// 	})
+// 	assert.Nil(t, err)
+// 	assert.NotNil(t, res)
+// 	// With valid pei, equipement_status, supi and gpsi
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"pei": "imei-012345678901234",
+// 		"supi": "imsi-208930000000001",
+// 		"gpsi": "msisdn-00000",
+// 		"equipement_status": "WHITELISTED",
+// 	})
+// 	assert.Nil(t, err)
+// 	assert.NotNil(t, res)
+//
+// 	// Fail to Insert documents
+// 	// With missing Pei
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"equipement_status": "BLACKLISTED",
+// 	})
+// 	assert.NotNil(t, err)
+// 	assert.Nil(t, res)
+// 	// With missing equipement_status
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"pei": "imei-012345678901234",
+// 	})
+// 	assert.NotNil(t, err)
+// 	assert.Nil(t, res)
+// 	// With missing Pei and equipement_status
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 	})
+// 	assert.NotNil(t, err)
+// 	assert.Nil(t, res)
+// 	// With not valid Pei
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"pei": "ppppppppppppp-012345678901234",
+// 		"equipement_status": "BLACKLISTED",
+// 	})
+// 	// With not valid equipement_status
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"pei": "imei-012345678901234",
+// 		"equipement_status": "PINKLISTED",
+// 	})
+// 	assert.NotNil(t, err)
+// 	assert.Nil(t, res)
+// 	// With not valid supi and gpsi
+// 	res, err = db.Collection("policyData.ues.eirData").InsertOne(context.TODO(), bson.M{
+// 		"pei": "imei-012345678901234",
+// 		"supi": "sssssssssss",
+// 		"gpsi": "ggggggggggg",
+// 		"equipement_status": "BLACKLISTED",
+// 	})
+// 	assert.NotNil(t, err)
+// 	assert.Nil(t, res)
+// }

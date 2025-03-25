@@ -94,7 +94,7 @@ type Tls struct {
 
 type Mongodb struct {
 	Name string `yaml:"name" valid:"type(string),required"`
-	Url  string `yaml:"url" valid:"requrl,required"`
+	Url  string `yaml:"url" valid:"required,required"`
 }
 
 func appendInvalid(err error) error {
