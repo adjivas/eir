@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 	"github.com/free5gc/openapi/models"
+	eir_models "github.com/adjivas/eir/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -28,11 +29,6 @@ import (
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/free5gc/util/mongoapi"
 )
-
-type responseEir struct {
-    EquipementStatus   string `json:"equipement_status"`
-    PEI                string `json:"pei"`
-}
 
 func setupHttpServer(t *testing.T) *gin.Engine {
 	router := util_logger.NewGinWithLogrus(logger.GinLog)
@@ -109,13 +105,91 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(responseEir {
-		EquipementStatus: "WHITELISTED",
-		PEI: "imei-012345678901234",
+	expected_message := util.ToBsonM(eir_models.EirResponseData {
+		Status: "WHITELISTED",
 	})
-		require.Equal(t, "{\"equipement_status\":\"WHITELISTED\",\"pei\":\"imei-012345678901234\"}", rsp.Body.String())
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := responseEir{}
+		json_message := eir_models.EirResponseData{}
+
+		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusOK, rsp.Code)
+	})
+}
+
+func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
+	server := setupHttpServer(t)
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	filter := bson.M{"pei": nil}
+	pei1 := bson.M{ "pei": "imei-42", "supi": "imsi-208930000000001", "equipement_status": "WHITELISTED" }
+	pei2 := bson.M{ "pei": "imei-43", "supi": "imsi-208930000000002", "equipement_status": "WHITELISTED" }
+	pei3 := bson.M{ "pei": "imei-012345678901234", "supi": "imsi-208930123456789", "equipement_status": "WHITELISTED" }
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	assert.Nil(t, err)
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(eir_models.EirResponseData {
+		Status: "WHITELISTED",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := eir_models.EirResponseData{}
+
+		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusOK, rsp.Code)
+	})
+}
+
+func TestEIR_EquipementStatus_FoundEquipementStatus_With(t *testing.T) {
+	server := setupHttpServer(t)
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	filter := bson.M{"pei": nil}
+	pei1 := bson.M{ "pei": "imei-42", "equipement_status": "WHITELISTED" }
+	pei2 := bson.M{ "pei": "imei-43", "equipement_status": "WHITELISTED" }
+	pei3 := bson.M{ "pei": "imei-012345678901234", "equipement_status": "WHITELISTED" }
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	assert.Nil(t, err)
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(eir_models.EirResponseData {
+		Status: "WHITELISTED",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := eir_models.EirResponseData{}
 
 		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
 		assert.Nil(t, err)
@@ -142,6 +216,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 	res, err := mongoapi.RestfulAPIPutOne("policyData.ues.eirData", filter, pei)
 	assert.Equal(t, res, false)
 	assert.Nil(t, err)
+
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)

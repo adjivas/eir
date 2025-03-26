@@ -8,6 +8,8 @@ import (
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/free5gc/openapi/models"
+	"github.com/adjivas/eir/internal/util"
+	eir_models "github.com/adjivas/eir/internal/models"
 )
 
 func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string, pei string) {
@@ -23,6 +25,9 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 		logger.CallbackLog.Errorf("The PEI is missing")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
-		c.JSON(http.StatusOK, data)
+		response := util.ToBsonM(eir_models.EirResponseData {
+			Status: data["equipement_status"].(string),
+		})
+		c.JSON(http.StatusOK, response)
 	}
 }
