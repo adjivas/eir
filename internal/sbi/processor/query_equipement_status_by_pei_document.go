@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
+	// "go.mongodb.org/mongo-driver/bson"
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/free5gc/openapi/models"
@@ -12,8 +12,17 @@ import (
 	eir_models "github.com/adjivas/eir/internal/models"
 )
 
-func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string, pei string) {
-	filter := bson.M{"pei": pei}
+func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string, pei string, supi string, gpsi string) {
+	filter := map[string]interface{}{
+		"pei": pei,
+	}
+	if supi != "" {
+		filter["supi"] = supi
+	}
+	if gpsi != "" {
+		filter["gpsi"] = gpsi
+	}
+	
 	data, p_equipement_status := p.GetDataFromDB(collName, filter)
 	if p_equipement_status != nil {
 		problemDetail := models.ProblemDetails{
@@ -22,7 +31,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 			Detail: "The Equipment Status wasn't found",
 			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 		}
-		logger.CallbackLog.Errorf("The PEI is missing")
+		logger.CallbackLog.Errorf("The Equipment Status wasn't found")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
 		response := util.ToBsonM(eir_models.EirResponseData {

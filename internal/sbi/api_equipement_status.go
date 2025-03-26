@@ -36,6 +36,8 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 
 	collName := "policyData.ues.eirData"
 	pei := c.Query("pei")
+	supi := c.DefaultQuery("supi", "")
+	gpsi := c.DefaultQuery("gpsi", "")
 	if pei == "" {
 		problemDetail := models.ProblemDetails{
 			Title: "The equipment identify checking has failed",
@@ -46,6 +48,6 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 		logger.CallbackLog.Errorf("The PEI is missing")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
-		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei)
+		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei, supi, gpsi)
     }
 }

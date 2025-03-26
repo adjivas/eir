@@ -138,7 +138,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
 	assert.Nil(t, err)
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&supi=imsi-208930123456789"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
