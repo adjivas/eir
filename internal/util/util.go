@@ -16,10 +16,10 @@ const (
 
 func ProblemDetailsSystemFailure(detail string) *models.ProblemDetails {
 	return &models.ProblemDetails{
-		Title:  "System failure",
-		Status: http.StatusInternalServerError,
+		Title: "The equipment identify checking has failed",
+		Status: http.StatusNotFound,
 		Detail: detail,
-		Cause:  "SYSTEM_FAILURE",
+		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 	}
 }
 

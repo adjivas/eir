@@ -5,11 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	// "github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
-	// // eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
-	// "github.com/adjivas/eir/internal/util"
+	"github.com/free5gc/openapi/models"
 )
 
 func (s *Server) getEquipementStatusRoutes() []Route {
@@ -37,22 +34,20 @@ func Index(c *gin.Context) {
 func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 	logger.EquipementStatusLog.Tracef("Handle EirEquipementStatus")
 
+	collName := "policyData.ues.eirData"
 	pei := c.Query("pei")
-	supi := c.Query("supi")
-	gpsi := c.Query("gpsi")
-	logger.MainLog.Infof("ADJIVAS Log enable is set to %v %v %v", pei, supi, gpsi)
-
-    // c.JSON(200, gin.H{
-    //     "status": "WHITELISTED",
-    // })
-    //
-
-	problemDetail := models.ProblemDetails{
-		Title: "Not found",
-		Status: http.StatusNotFound,
-		Detail: "Supi not found",
-		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
-	}
-	// logger.CallbackLog.Errorf("Get Request Body error: %+v", "Supi not found")
-	c.JSON(http.StatusNotFound, problemDetail)
+	supi := c.DefaultQuery("supi", "")
+	gpsi := c.DefaultQuery("gpsi", "")
+	if pei == "" {
+		problemDetail := models.ProblemDetails{
+			Title: "The equipment identify checking has failed",
+			Status: http.StatusNotFound,
+			Detail: "The PEI is missing",
+			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
+		}
+		logger.CallbackLog.Errorf("The PEI is missing")
+		c.JSON(http.StatusNotFound, problemDetail)
+	} else {
+		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei, supi, gpsi)
+    }
 }

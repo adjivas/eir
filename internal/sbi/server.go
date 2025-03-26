@@ -11,6 +11,7 @@ import (
 
 	"github.com/free5gc/openapi/models"
 	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
@@ -27,6 +28,8 @@ type Server struct {
 
 type EIR interface {
 	app.App
+
+	Processor() *processor.Processor
 }
 
 func NewServer(eir EIR, tlsKeyLogPath string) *Server {
@@ -95,7 +98,8 @@ func newRouter(s *Server) *gin.Engine {
 	dataRepositoryGroup.Use(func(c *gin.Context) {
 		util.NewRouterAuthorizationCheck(models.ServiceName_N5G_EIR_EIC).Check(c, s.Context())
 	})
-	AddService(dataRepositoryGroup, s.getEquipementStatusRoutes())
+	equipementStatusRoutes := s.getEquipementStatusRoutes()
+	AddService(dataRepositoryGroup, equipementStatusRoutes)
 
 	return router
 }
