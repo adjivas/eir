@@ -6,11 +6,14 @@ import (
 	"github.com/adjivas/eir/internal/logger"
 	eir_models "github.com/adjivas/eir/internal/models"
 	"github.com/adjivas/eir/internal/util"
-	"github.com/free5gc/openapi/models"
 	"github.com/gin-gonic/gin"
+
+	"github.com/free5gc/openapi/models"
 )
 
-func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string, pei string, supi string, gpsi string) {
+func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string,
+	pei string, supi string, gpsi string,
+) {
 	filter := map[string]interface{}{
 		"pei": pei,
 	}

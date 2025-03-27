@@ -12,14 +12,15 @@ import (
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/free5gc/openapi/models"
-	util_logger "github.com/free5gc/util/logger"
-	"github.com/free5gc/util/mongoapi"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/free5gc/openapi/models"
+	util_logger "github.com/free5gc/util/logger"
+	"github.com/free5gc/util/mongoapi"
 )
 
 func setupHttpServer(t *testing.T) *gin.Engine {
@@ -87,7 +88,9 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	pei1 := bson.M{"pei": "imei-42", "equipement_status": "BLACKLISTED"}
 	pei2 := bson.M{"pei": "imei-43", "equipement_status": "BLACKLISTED"}
 	pei3 := bson.M{"pei": "imei-012345678901234", "equipement_status": "WHITELISTED"}
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
+	filters := []bson.M{filter, filter, filter}
+	peis := []map[string]interface{}{pei1, pei2, pei3}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
@@ -103,7 +106,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := eir_models.EirResponseData{}
 
-		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
 
 		message := util.ToBsonM(json_message)
@@ -127,7 +130,9 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	pei1 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930000000001", "equipement_status": "BLACKLISTED"}
 	pei2 := bson.M{"pei": "imei-43", "supi": "imsi-208930123456789", "equipement_status": "BLACKLISTED"}
 	pei3 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930123456789", "equipement_status": "WHITELISTED"}
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
+	filters := []bson.M{filter, filter, filter}
+	peis := []map[string]interface{}{pei1, pei2, pei3}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&supi=imsi-208930123456789"
@@ -143,7 +148,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := eir_models.EirResponseData{}
 
-		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
 
 		message := util.ToBsonM(json_message)
@@ -167,7 +172,9 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	pei1 := bson.M{"pei": "imei-42", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED"}
 	pei2 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-00000", "equipement_status": "BLACKLISTED"}
 	pei3 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED"}
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
+	filters := []bson.M{filter, filter, filter}
+	peis := []map[string]interface{}{pei1, pei2, pei3}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&gpsi=msisdn-12345"
@@ -183,7 +190,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := eir_models.EirResponseData{}
 
-		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
 
 		message := util.ToBsonM(json_message)
@@ -204,13 +211,25 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{"pei": "imei-42", "supi": "imsi-208930000000042", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED"}
-	pei2 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED"}
-	pei3 := bson.M{"pei": "imei-43", "supi": "imsi-208930000000043", "gpsi": "msisdn-00043", "equipement_status": "BLACKLISTED"}
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
+	pei1 := bson.M{
+		"pei": "imei-42", "supi": "imsi-208930000000042", "gpsi": "msisdn-00042",
+		"equipement_status": "BLACKLISTED",
+	}
+	pei2 := bson.M{
+		"pei": "imei-012345678901234", "supi": "imsi-012345678901234", "gpsi": "msisdn-12345",
+		"equipement_status": "WHITELISTED",
+	}
+	pei3 := bson.M{
+		"pei": "imei-43", "supi": "imsi-208930000000043", "gpsi": "msisdn-00043",
+		"equipement_status": "BLACKLISTED",
+	}
+	filters := []bson.M{filter, filter, filter}
+	peis := []map[string]interface{}{pei1, pei2, pei3}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&supi=imsi-012345678901234&gpsi=msisdn-12345"
+	reqUri := factory.EirDrResUriPrefix +
+		"/equipement-status?pei=imei-012345678901234&supi=imsi-012345678901234&gpsi=msisdn-12345"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
@@ -223,7 +242,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := eir_models.EirResponseData{}
 
-		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
 
 		message := util.ToBsonM(json_message)
@@ -265,7 +284,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
 
-		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
 
 		message := util.ToBsonM(json_message)
@@ -301,7 +320,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
 
-		err := json.Unmarshal([]byte(rsp.Body.String()), &json_message)
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
 
 		message := util.ToBsonM(json_message)

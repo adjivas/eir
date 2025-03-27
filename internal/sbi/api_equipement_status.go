@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/free5gc/openapi/models"
 	"github.com/gin-gonic/gin"
+
+	"github.com/free5gc/openapi/models"
 )
 
 func (s *Server) getEquipementStatusRoutes() []Route {

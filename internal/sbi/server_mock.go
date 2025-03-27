@@ -83,7 +83,9 @@ func (m *MockEIR) SetLogEnable(enable bool) {
 // SetLogEnable indicates an expected call of SetLogEnable.
 func (mr *MockEIRMockRecorder) SetLogEnable(enable interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogEnable", reflect.TypeOf((*MockEIR)(nil).SetLogEnable), enable)
+
+	reflect := reflect.TypeOf((*MockEIR)(nil).SetLogEnable)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogEnable", reflect, enable)
 }
 
 // SetLogLevel mocks base method.
@@ -95,7 +97,8 @@ func (m *MockEIR) SetLogLevel(level string) {
 // SetLogLevel indicates an expected call of SetLogLevel.
 func (mr *MockEIRMockRecorder) SetLogLevel(level interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogLevel", reflect.TypeOf((*MockEIR)(nil).SetLogLevel), level)
+	reflect := reflect.TypeOf((*MockEIR)(nil).SetLogLevel)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLogLevel", reflect, level)
 }
 
 // SetReportCaller mocks base method.
@@ -107,7 +110,8 @@ func (m *MockEIR) SetReportCaller(reportCaller bool) {
 // SetReportCaller indicates an expected call of SetReportCaller.
 func (mr *MockEIRMockRecorder) SetReportCaller(reportCaller interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetReportCaller", reflect.TypeOf((*MockEIR)(nil).SetReportCaller), reportCaller)
+	reflect := reflect.TypeOf((*MockEIR)(nil).SetReportCaller)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetReportCaller", reflect, reportCaller)
 }
 
 // Start mocks base method.

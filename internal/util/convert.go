@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/free5gc/openapi/models"
 	"go.mongodb.org/mongo-driver/bson"
+
+	"github.com/free5gc/openapi/models"
 )
 
 func MapToByte(data map[string]interface{}) []byte {
