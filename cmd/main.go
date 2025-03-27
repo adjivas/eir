@@ -8,13 +8,12 @@ import (
 	"runtime/debug"
 	"syscall"
 
-	"github.com/urfave/cli"
-
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/adjivas/eir/pkg/service"
 	logger_util "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/version"
+	"github.com/urfave/cli"
 )
 
 var EIR *service.EirApp

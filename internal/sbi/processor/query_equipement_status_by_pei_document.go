@@ -3,13 +3,11 @@ package processor
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	// "go.mongodb.org/mongo-driver/bson"
-
 	"github.com/adjivas/eir/internal/logger"
 	eir_models "github.com/adjivas/eir/internal/models"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/free5gc/openapi/models"
+	"github.com/gin-gonic/gin"
 )
 
 func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string, pei string, supi string, gpsi string) {

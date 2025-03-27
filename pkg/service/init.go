@@ -8,8 +8,6 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/sirupsen/logrus"
-
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi"
@@ -20,6 +18,7 @@ import (
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/nrf/NFManagement"
 	"github.com/free5gc/util/mongoapi"
+	"github.com/sirupsen/logrus"
 )
 
 type EirApp struct {

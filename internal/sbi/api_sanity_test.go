@@ -3,27 +3,23 @@ package sbi
 import (
 	"context"
 	"encoding/json"
-	eir_models "github.com/adjivas/eir/internal/models"
-	"github.com/free5gc/openapi/models"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
-
+	"github.com/adjivas/eir/internal/logger"
+	eir_models "github.com/adjivas/eir/internal/models"
+	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/stretchr/testify/assert"
-
-	"github.com/adjivas/eir/internal/logger"
+	"github.com/free5gc/openapi/models"
 	util_logger "github.com/free5gc/util/logger"
-
-	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/free5gc/util/mongoapi"
+	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func setupHttpServer(t *testing.T) *gin.Engine {

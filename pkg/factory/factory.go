@@ -8,10 +8,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/adjivas/eir/internal/logger"
 	"github.com/asaskevich/govalidator"
 	"gopkg.in/yaml.v2"
-
-	"github.com/adjivas/eir/internal/logger"
 )
 
 var EirConfig *Config

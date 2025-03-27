@@ -1,13 +1,11 @@
 package database
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/adjivas/eir/internal/logger"
-	"github.com/free5gc/openapi/models"
-
 	"github.com/adjivas/eir/internal/database/mongodb"
+	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
+	"github.com/free5gc/openapi/models"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (

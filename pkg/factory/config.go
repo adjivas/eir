@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/asaskevich/govalidator"
-
 	"github.com/adjivas/eir/internal/logger"
+	"github.com/asaskevich/govalidator"
 )
 
 const (

@@ -1,14 +1,13 @@
 package mongodb
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
-
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/mongoapi"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type MongoDbConnector struct {
