@@ -51,8 +51,6 @@ func NewServer(eir EIR, tlsKeyLogPath string) *Server {
 }
 
 func (s *Server) Run(wg *sync.WaitGroup) {
-	logger.SBILog.Info("Starting server...")
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

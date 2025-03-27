@@ -38,8 +38,6 @@ type EirApp struct {
 var _ app.App = &EirApp{}
 
 func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*EirApp, error) {
-	eir_context.Init()
-
 	eir := &EirApp{
 		cfg:    cfg,
 		eirCtx: eir_context.GetSelf(),
@@ -50,6 +48,7 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 	eir.SetLogEnable(cfg.GetLogEnable())
 	eir.SetLogLevel(cfg.GetLogLevel())
 	eir.SetReportCaller(cfg.GetLogReportCaller())
+	eir_context.Init()
 
 	processor := processor.NewProcessor(eir)
 	eir.processor = processor
@@ -159,11 +158,8 @@ func (a *EirApp) Start() {
 	}
 
 	// get config file info
-	logger.InitLog.Infoln("Server started")
 	config := factory.EirConfig
 	mongodb := config.Configuration.Mongodb
-
-	logger.InitLog.Infof("EIR Config Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
 
 	// Connect to MongoDB
 	if err := mongoapi.SetMongoDB(mongodb.Name, mongodb.Url); err != nil {
@@ -178,6 +174,8 @@ func (a *EirApp) Start() {
 			a.deregisterFromNrf()
 		}
 	}()
+
+	logger.InitLog.Infoln("Server started")
 
 	a.wg.Add(1)
 	go a.listenShutdown(a.ctx)
