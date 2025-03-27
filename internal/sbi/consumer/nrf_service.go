@@ -50,7 +50,7 @@ func (ns *NrfService) buildNFProfile(context *eir_context.EIRContext) (models.Nr
 		NfStatus:     models.NrfNfManagementNfStatus_REGISTERED,
 	}
 	if context.RegisterIP.Is6() {
-		profile.Ipv4Addresses = []string{context.RegisterIP.String()}
+		profile.Ipv6Addresses = []string{context.RegisterIP.String()}
 	} else if context.RegisterIP.Is4() {
 		profile.Ipv4Addresses = []string{context.RegisterIP.String()}
 	}
