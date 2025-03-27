@@ -152,6 +152,8 @@ func initEirContext() {
 
 	eirContext.NrfUri = configuration.NrfUri
 	eirContext.NrfCertPem = configuration.NrfCertPem
+
+	fmt.Println("eir context = ", &eirContext)
 }
 
 func resolveIP(ip string) netip.Addr {
