@@ -1,8 +1,8 @@
 package consumer
 
 import (
-	"github.com/free5gc/openapi/nrf/NFManagement"
 	"github.com/adjivas/eir/pkg/app"
+	"github.com/free5gc/openapi/nrf/NFManagement"
 )
 
 type Consumer struct {

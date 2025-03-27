@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
+	eir_context "github.com/adjivas/eir/internal/context"
+	"github.com/adjivas/eir/internal/logger"
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/nrf/NFManagement"
-	eir_context "github.com/adjivas/eir/internal/context"
-	"github.com/adjivas/eir/internal/logger"
 )
 
 type NrfService struct {
@@ -43,10 +43,10 @@ func (ns *NrfService) getNFManagementClient(uri string) *NFManagement.APIClient 
 }
 
 func (ns *NrfService) buildNFProfile(context *eir_context.EIRContext) (models.NrfNfManagementNfProfile, error) {
-	profile := models.NrfNfManagementNfProfile {
+	profile := models.NrfNfManagementNfProfile{
 		NfInstanceId: context.NfId,
-		NfType:        models.NrfNfManagementNfType__5_G_EIR,
-		NfStatus:      models.NrfNfManagementNfStatus_REGISTERED,
+		NfType:       models.NrfNfManagementNfType__5_G_EIR,
+		NfStatus:     models.NrfNfManagementNfStatus_REGISTERED,
 	}
 	if context.RegisterIP.Is6() {
 		profile.Ipv4Addresses = []string{context.RegisterIP.String()}

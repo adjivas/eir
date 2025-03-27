@@ -4,8 +4,8 @@ import (
 	reflect "reflect"
 
 	context "github.com/adjivas/eir/internal/context"
-	factory "github.com/adjivas/eir/pkg/factory"
 	processor "github.com/adjivas/eir/internal/sbi/processor"
+	factory "github.com/adjivas/eir/pkg/factory"
 	gomock "github.com/golang/mock/gomock"
 )
 

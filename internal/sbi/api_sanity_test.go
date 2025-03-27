@@ -2,20 +2,20 @@ package sbi
 
 import (
 	"context"
+	"encoding/json"
+	eir_models "github.com/adjivas/eir/internal/models"
+	"github.com/free5gc/openapi/models"
 	"net/http"
 	"net/http/httptest"
-	"encoding/json"
 	"testing"
-	"github.com/free5gc/openapi/models"
-	eir_models "github.com/adjivas/eir/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/stretchr/testify/assert"
-	"github.com/adjivas/eir/internal/util"
 
 	"github.com/adjivas/eir/internal/logger"
 	util_logger "github.com/free5gc/util/logger"
@@ -38,8 +38,8 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 			DbConnectorType: "mongodb",
 			Mongodb:         &factory.Mongodb{},
 			Sbi: &factory.Sbi{
-				BindingIP:   "127.0.0.1",
-				Port:        8000,
+				BindingIP: "127.0.0.1",
+				Port:      8000,
 			},
 		},
 	}
@@ -88,10 +88,10 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{ "pei": "imei-42", "equipement_status": "BLACKLISTED" }
-	pei2 := bson.M{ "pei": "imei-43", "equipement_status": "BLACKLISTED" }
-	pei3 := bson.M{ "pei": "imei-012345678901234", "equipement_status": "WHITELISTED" }
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	pei1 := bson.M{"pei": "imei-42", "equipement_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-43", "equipement_status": "BLACKLISTED"}
+	pei3 := bson.M{"pei": "imei-012345678901234", "equipement_status": "WHITELISTED"}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
@@ -101,7 +101,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData {
+	expected_message := util.ToBsonM(eir_models.EirResponseData{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
@@ -128,10 +128,10 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{ "pei": "imei-012345678901234", "supi": "imsi-208930000000001", "equipement_status": "BLACKLISTED" }
-	pei2 := bson.M{ "pei": "imei-43", "supi": "imsi-208930123456789", "equipement_status": "BLACKLISTED" }
-	pei3 := bson.M{ "pei": "imei-012345678901234", "supi": "imsi-208930123456789", "equipement_status": "WHITELISTED" }
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	pei1 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930000000001", "equipement_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-43", "supi": "imsi-208930123456789", "equipement_status": "BLACKLISTED"}
+	pei3 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930123456789", "equipement_status": "WHITELISTED"}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&supi=imsi-208930123456789"
@@ -141,7 +141,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData {
+	expected_message := util.ToBsonM(eir_models.EirResponseData{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
@@ -168,10 +168,10 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{ "pei": "imei-42", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED" }
-	pei2 := bson.M{ "pei": "imei-012345678901234", "gpsi": "msisdn-00000", "equipement_status": "BLACKLISTED" }
-	pei3 := bson.M{ "pei": "imei-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED" }
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	pei1 := bson.M{"pei": "imei-42", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-00000", "equipement_status": "BLACKLISTED"}
+	pei3 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED"}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&gpsi=msisdn-12345"
@@ -181,7 +181,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData {
+	expected_message := util.ToBsonM(eir_models.EirResponseData{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
@@ -208,10 +208,10 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{ "pei": "imei-42", "supi": "imsi-208930000000042", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED" }
-	pei2 := bson.M{ "pei": "imei-012345678901234", "supi": "imsi-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED" }
-	pei3 := bson.M{ "pei": "imei-43", "supi": "imsi-208930000000043", "gpsi": "msisdn-00043", "equipement_status": "BLACKLISTED" }
-	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{ filter, filter, filter }, []map[string]interface{}{ pei1, pei2, pei3 })
+	pei1 := bson.M{"pei": "imei-42", "supi": "imsi-208930000000042", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED"}
+	pei3 := bson.M{"pei": "imei-43", "supi": "imsi-208930000000043", "gpsi": "msisdn-00043", "equipement_status": "BLACKLISTED"}
+	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", []bson.M{filter, filter, filter}, []map[string]interface{}{pei1, pei2, pei3})
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&supi=imsi-012345678901234&gpsi=msisdn-12345"
@@ -221,7 +221,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData {
+	expected_message := util.ToBsonM(eir_models.EirResponseData{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
@@ -248,7 +248,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei := bson.M{ "pei": "imei-42", "equipement_status": "WHITELISTED" }
+	pei := bson.M{"pei": "imei-42", "equipement_status": "WHITELISTED"}
 	res, err := mongoapi.RestfulAPIPutOne("policyData.ues.eirData", filter, pei)
 	assert.Equal(t, res, false)
 	assert.Nil(t, err)
@@ -261,7 +261,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 	server.ServeHTTP(rsp, req)
 
 	expected_message := util.ToBsonM(models.ProblemDetails{
-		Title: "The equipment identify checking has failed",
+		Title:  "The equipment identify checking has failed",
 		Status: http.StatusNotFound,
 		Detail: "The Equipment Status wasn't found",
 		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
@@ -297,7 +297,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 	server.ServeHTTP(rsp, req)
 
 	expected_message := util.ToBsonM(models.ProblemDetails{
-		Title: "The equipment identify checking has failed",
+		Title:  "The equipment identify checking has failed",
 		Status: http.StatusNotFound,
 		Detail: "The PEI is missing",
 		Cause:  "ERROR_EQUIPMENT_UNKNOWN",

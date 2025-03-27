@@ -3,11 +3,11 @@ package mongodb
 import (
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/models"
-	"github.com/adjivas/eir/pkg/factory"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/util"
+	"github.com/adjivas/eir/pkg/factory"
+	"github.com/free5gc/openapi"
+	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/mongoapi"
 )
 
@@ -20,7 +20,7 @@ func NewMongoDbConnector(mongo *factory.Mongodb) MongoDbConnector {
 		Mongodb: mongo,
 	}
 }
-	
+
 func (m MongoDbConnector) GetDataFromDB(
 	collName string, filter bson.M) (
 	map[string]interface{}, *models.ProblemDetails,

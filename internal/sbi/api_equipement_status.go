@@ -40,7 +40,7 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 	gpsi := c.DefaultQuery("gpsi", "")
 	if pei == "" {
 		problemDetail := models.ProblemDetails{
-			Title: "The equipment identify checking has failed",
+			Title:  "The equipment identify checking has failed",
 			Status: http.StatusNotFound,
 			Detail: "The PEI is missing",
 			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
@@ -49,5 +49,5 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
 		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei, supi, gpsi)
-    }
+	}
 }

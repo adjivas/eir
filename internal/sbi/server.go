@@ -4,18 +4,18 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"sync"
 	"time"
-	"net/netip"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/free5gc/openapi/models"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
+	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/httpwrapper"
 	logger_util "github.com/free5gc/util/logger"
 )
@@ -93,7 +93,7 @@ func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Se
 		logger.SBILog.Errorf("BindingIP isn't a valid IP: %+v", err)
 		return nil, err
 	}
-	
+
 	bindAddr := netip.AddrPortFrom(addr, uint16(port)).String()
 
 	logger.SBILog.Infof("Binding addr: [%s]", bindAddr)

@@ -10,15 +10,15 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/free5gc/openapi"
-	"github.com/free5gc/openapi/nrf/NFManagement"
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi"
-	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/sbi/consumer"
+	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
+	"github.com/free5gc/openapi"
+	"github.com/free5gc/openapi/nrf/NFManagement"
 	"github.com/free5gc/util/mongoapi"
 )
 

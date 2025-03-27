@@ -80,11 +80,11 @@ func (c *Configuration) validate() (bool, error) {
 }
 
 type Sbi struct {
-	Scheme       string `yaml:"scheme" valid:"in(http|https),optional"`
-	RegisterIP   string `yaml:"registerIP,omitempty" valid:"host,optional"` // IP that is registered at NRF.
-	BindingIP   string `yaml:"bindingIP,omitempty" valid:"host,optional"` // IP used to run the server in the node.
-	Port        int    `yaml:"port" valid:"port,required"`
-	Tls         *Tls   `yaml:"tls,omitempty" valid:"optional"`
+	Scheme     string `yaml:"scheme" valid:"in(http|https),optional"`
+	RegisterIP string `yaml:"registerIP,omitempty" valid:"host,optional"` // IP that is registered at NRF.
+	BindingIP  string `yaml:"bindingIP,omitempty" valid:"host,optional"`  // IP used to run the server in the node.
+	Port       int    `yaml:"port" valid:"port,required"`
+	Tls        *Tls   `yaml:"tls,omitempty" valid:"optional"`
 }
 
 func (s *Sbi) validate() (bool, error) {

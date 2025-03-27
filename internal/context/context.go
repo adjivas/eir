@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"os"
-	"strconv"
 	"net"
 	"net/netip"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/free5gc/openapi/models"
-	"github.com/free5gc/openapi/oauth"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
+	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/openapi/oauth"
 )
 
 var eirContext = EIRContext{}
@@ -43,7 +43,7 @@ func Init() {
 	serviceName := []models.ServiceName{
 		models.ServiceName_N5G_EIR_EIC,
 	}
-	
+
 	addr := eirContext.RegisterIP
 	port := 29510
 	eirContext.NrfUri = fmt.Sprintf("%s://%s", models.UriScheme_HTTPS, netip.AddrPortFrom(addr, uint16(port)).String())
@@ -136,7 +136,7 @@ func initEirContext() {
 	eirContext.NfId = uuid.New().String()
 	sbi := configuration.Sbi
 
-	eirContext.SBIPort = sbi.Port // default port
+	eirContext.SBIPort = sbi.Port                       // default port
 	eirContext.UriScheme = models.UriScheme(sbi.Scheme) // default localhost
 
 	if bindingIP := os.Getenv(sbi.BindingIP); bindingIP != "" {

@@ -7,21 +7,21 @@ import (
 )
 
 var (
-	Log         *logrus.Logger
-	NfLog       *logrus.Entry
-	MainLog     *logrus.Entry
-	InitLog     *logrus.Entry
-	CfgLog      *logrus.Entry
-	CtxLog      *logrus.Entry
+	Log                 *logrus.Logger
+	NfLog               *logrus.Entry
+	MainLog             *logrus.Entry
+	InitLog             *logrus.Entry
+	CfgLog              *logrus.Entry
+	CtxLog              *logrus.Entry
 	EquipementStatusLog *logrus.Entry
-	UtilLog     *logrus.Entry
-	HttpLog     *logrus.Entry
-	ConsumerLog *logrus.Entry
-	GinLog      *logrus.Entry
-	ProcLog     *logrus.Entry
-	SBILog      *logrus.Entry
-	DbLog       *logrus.Entry
-	CallbackLog *logrus.Entry
+	UtilLog             *logrus.Entry
+	HttpLog             *logrus.Entry
+	ConsumerLog         *logrus.Entry
+	GinLog              *logrus.Entry
+	ProcLog             *logrus.Entry
+	SBILog              *logrus.Entry
+	DbLog               *logrus.Entry
+	CallbackLog         *logrus.Entry
 )
 
 func init() {

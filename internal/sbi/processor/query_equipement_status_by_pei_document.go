@@ -7,9 +7,9 @@ import (
 	// "go.mongodb.org/mongo-driver/bson"
 
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/free5gc/openapi/models"
-	"github.com/adjivas/eir/internal/util"
 	eir_models "github.com/adjivas/eir/internal/models"
+	"github.com/adjivas/eir/internal/util"
+	"github.com/free5gc/openapi/models"
 )
 
 func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string, pei string, supi string, gpsi string) {
@@ -22,11 +22,11 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 	if gpsi != "" {
 		filter["gpsi"] = gpsi
 	}
-	
+
 	data, p_equipement_status := p.GetDataFromDB(collName, filter)
 	if p_equipement_status != nil {
 		problemDetail := models.ProblemDetails{
-			Title: "The equipment identify checking has failed",
+			Title:  "The equipment identify checking has failed",
 			Status: http.StatusNotFound,
 			Detail: "The Equipment Status wasn't found",
 			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
@@ -34,7 +34,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 		logger.CallbackLog.Errorf("The Equipment Status wasn't found")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
-		response := util.ToBsonM(eir_models.EirResponseData {
+		response := util.ToBsonM(eir_models.EirResponseData{
 			Status: data["equipement_status"].(string),
 		})
 		c.JSON(http.StatusOK, response)

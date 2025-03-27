@@ -16,7 +16,7 @@ const (
 
 func ProblemDetailsSystemFailure(detail string) *models.ProblemDetails {
 	return &models.ProblemDetails{
-		Title: "The equipment identify checking has failed",
+		Title:  "The equipment identify checking has failed",
 		Status: http.StatusNotFound,
 		Detail: detail,
 		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
