@@ -47,7 +47,11 @@ func (ns *NrfService) buildNFProfile(context *eir_context.EIRContext) (models.Nr
 		NfInstanceId: context.NfId,
 		NfType:        models.NrfNfManagementNfType__5_G_EIR,
 		NfStatus:      models.NrfNfManagementNfStatus_REGISTERED,
-		Ipv4Addresses: []string{context.RegisterIPv4},
+	}
+	if context.RegisterIP.Is6() {
+		profile.Ipv4Addresses = []string{context.RegisterIP.String()}
+	} else if context.RegisterIP.Is4() {
+		profile.Ipv4Addresses = []string{context.RegisterIP.String()}
 	}
 
 	var services []models.NrfNfManagementNfService

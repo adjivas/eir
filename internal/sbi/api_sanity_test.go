@@ -38,7 +38,7 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 			DbConnectorType: "mongodb",
 			Mongodb:         &factory.Mongodb{},
 			Sbi: &factory.Sbi{
-				BindingIPv4: "127.0.0.1",
+				BindingIP:   "127.0.0.1",
 				Port:        8000,
 			},
 		},

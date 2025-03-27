@@ -18,7 +18,7 @@ const (
 	EirDefaultCertPemPath    = "./cert/eir.pem"
 	EirDefaultPrivateKeyPath = "./cert/eir.key"
 	EirDefaultConfigPath     = "./config/eircfg.yaml"
-	EirSbiDefaultIPv4        = "127.0.0.7"
+	EirSbiDefaultIP          = "127.0.0.7"
 	EirSbiDefaultPort        = 8000
 	EirSbiDefaultScheme      = "https"
 	EirDefaultNrfUri         = "https://127.0.0.10:8000"
@@ -51,7 +51,7 @@ type Info struct {
 }
 
 const (
-	EIR_DEFAULT_IPV4     = "127.0.0.4"
+	EIR_DEFAULT_IP       = "127.0.0.4"
 	EIR_DEFAULT_PORT     = "8000"
 	EIR_DEFAULT_PORT_INT = 8000
 )
@@ -71,25 +71,64 @@ type Logger struct {
 }
 
 func (c *Configuration) validate() (bool, error) {
-	govalidator.TagMap["scheme"] = govalidator.Validator(func(str string) bool {
-		return str == "https" || str == "http"
-	})
+	if sbi := c.Sbi; sbi != nil {
+		return sbi.validate()
+	}
+
 	result, err := govalidator.ValidateStruct(c)
 	return result, appendInvalid(err)
 }
 
 type Sbi struct {
-	Scheme       string `yaml:"scheme" valid:"scheme,required"`
-	RegisterIPv4 string `yaml:"registerIPv4,omitempty" valid:"host,optional"` // IP that is registered at NRF.
-	// IPv6Addr string `yaml:"ipv6Addr,omitempty"`
-	BindingIPv4 string `yaml:"bindingIPv4,omitempty" valid:"host,optional"` // IP used to run the server in the node.
+	Scheme       string `yaml:"scheme" valid:"in(http|https),optional"`
+	RegisterIP   string `yaml:"registerIP,omitempty" valid:"host,optional"` // IP that is registered at NRF.
+	BindingIP   string `yaml:"bindingIP,omitempty" valid:"host,optional"` // IP used to run the server in the node.
 	Port        int    `yaml:"port" valid:"port,required"`
 	Tls         *Tls   `yaml:"tls,omitempty" valid:"optional"`
+}
+
+func (s *Sbi) validate() (bool, error) {
+	// Set a default Schme if the Configuration does not provides one
+	if s.Scheme == "" {
+		s.Scheme = EirSbiDefaultScheme
+	}
+
+	// Set a default BindingIP/RegisterIP if the Configuration does not provides them
+	if s.BindingIP == "" && s.RegisterIP == "" {
+		s.BindingIP = EirSbiDefaultIP
+		s.RegisterIP = EirSbiDefaultIP
+	} else {
+		// Complete any missing BindingIP/RegisterIP from RegisterIP/BindingIP
+		if s.BindingIP == "" {
+			s.BindingIP = s.RegisterIP
+		} else if s.RegisterIP == "" {
+			s.RegisterIP = s.BindingIP
+		}
+	}
+
+	// Set a default Port if the Configuration does not provides one
+	if s.Port == 0 {
+		s.Port = EirSbiDefaultPort
+	}
+
+	if tls := s.Tls; tls != nil {
+		if result, err := tls.validate(); err != nil {
+			return result, err
+		}
+	}
+
+	result, err := govalidator.ValidateStruct(s)
+	return result, err
 }
 
 type Tls struct {
 	Pem string `yaml:"pem,omitempty" valid:"type(string),minstringlength(1),required"`
 	Key string `yaml:"key,omitempty" valid:"type(string),minstringlength(1),required"`
+}
+
+func (t *Tls) validate() (bool, error) {
+	result, err := govalidator.ValidateStruct(t)
+	return result, err
 }
 
 type Mongodb struct {

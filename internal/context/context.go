@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"net"
+	"net/netip"
 	"strings"
 	"sync"
 	"time"
@@ -41,7 +43,10 @@ func Init() {
 	serviceName := []models.ServiceName{
 		models.ServiceName_N5G_EIR_EIC,
 	}
-	eirContext.NrfUri = fmt.Sprintf("%s://%s:%d", models.UriScheme_HTTPS, eirContext.RegisterIPv4, 29510)
+	
+	addr := eirContext.RegisterIP
+	port := 29510
+	eirContext.NrfUri = fmt.Sprintf("%s://%s", models.UriScheme_HTTPS, netip.AddrPortFrom(addr, uint16(port)).String())
 	initEirContext()
 
 	config := factory.EirConfig
@@ -51,10 +56,10 @@ func Init() {
 type EIRContext struct {
 	Name                                    string
 	UriScheme                               models.UriScheme
-	BindingIPv4                             string
+	RegisterIP                              netip.Addr // IP register to NRF
+	BindingIP                               netip.Addr
 	SBIPort                                 int
 	NfService                               map[models.ServiceName]models.NrfNfManagementNfService
-	RegisterIPv4                            string // IP register to NRF
 	HttpIPv6Address                         string
 	NfId                                    string
 	NrfUri                                  string
@@ -126,37 +131,39 @@ func (context *EIRContext) Reset() {
 func initEirContext() {
 	config := factory.EirConfig
 	logger.UtilLog.Infof("eirconfig Info: Version[%s] Description[%s]", config.Info.Version, config.Info.Description)
+
 	configuration := config.Configuration
 	eirContext.NfId = uuid.New().String()
-	eirContext.RegisterIPv4 = factory.EIR_DEFAULT_IPV4 // default localhost
-	eirContext.SBIPort = factory.EIR_DEFAULT_PORT_INT  // default port
-	if sbi := configuration.Sbi; sbi != nil {
-		eirContext.UriScheme = models.UriScheme(sbi.Scheme)
-		if sbi.RegisterIPv4 != "" {
-			eirContext.RegisterIPv4 = sbi.RegisterIPv4
-		}
-		if sbi.Port != 0 {
-			eirContext.SBIPort = sbi.Port
-		}
+	sbi := configuration.Sbi
 
-		eirContext.BindingIPv4 = os.Getenv(sbi.BindingIPv4)
-		if eirContext.BindingIPv4 != "" {
-			logger.UtilLog.Info("Parsing ServerIPv4 address from ENV Variable.")
-		} else {
-			eirContext.BindingIPv4 = sbi.BindingIPv4
-			if eirContext.BindingIPv4 == "" {
-				logger.UtilLog.Warn("Error parsing ServerIPv4 address as string. Using the 0.0.0.0 address as default.")
-				eirContext.BindingIPv4 = "0.0.0.0"
-			}
-		}
+	eirContext.SBIPort = sbi.Port // default port
+	eirContext.UriScheme = models.UriScheme(sbi.Scheme) // default localhost
+
+	if bindingIP := os.Getenv(sbi.BindingIP); bindingIP != "" {
+		logger.UtilLog.Info("Parsing BindingIP address from ENV Variable.")
+		sbi.BindingIP = bindingIP
 	}
-	if configuration.NrfUri != "" {
-		eirContext.NrfUri = configuration.NrfUri
-	} else {
-		logger.UtilLog.Warn("NRF Uri is empty! Using localhost as NRF IPv4 address.")
-		eirContext.NrfUri = fmt.Sprintf("%s://%s:%d", eirContext.UriScheme, "127.0.0.1", 29510)
+	if registerIP := os.Getenv(sbi.RegisterIP); registerIP != "" {
+		logger.UtilLog.Info("Parsing RegisterIP address from ENV Variable.")
+		sbi.RegisterIP = registerIP
 	}
+	eirContext.BindingIP = resolveIP(sbi.BindingIP)
+	eirContext.RegisterIP = resolveIP(sbi.RegisterIP)
+
+	eirContext.NrfUri = configuration.NrfUri
 	eirContext.NrfCertPem = configuration.NrfCertPem
+}
+
+func resolveIP(ip string) netip.Addr {
+	resolvedIPs, err := net.DefaultResolver.LookupNetIP(context.Background(), "ip", ip)
+	if err != nil {
+		logger.InitLog.Errorf("Lookup failed with %s: %+v", ip, err)
+	}
+	resolvedIP := resolvedIPs[0].Unmap()
+	if resolvedIP := resolvedIP.String(); resolvedIP != ip {
+		logger.UtilLog.Infof("Lookup revolved %s into %s", ip, resolvedIP)
+	}
+	return resolvedIP
 }
 
 func initNfService(serviceName []models.ServiceName, version string) (
@@ -176,35 +183,40 @@ func initNfService(serviceName []models.ServiceName, version string) (
 			},
 			Scheme:          eirContext.UriScheme,
 			NfServiceStatus: models.NfServiceStatus_REGISTERED,
-			ApiPrefix:       GetIPv4Uri(),
-			IpEndPoints: []models.IpEndPoint{
-				{
-					Ipv4Address: eirContext.RegisterIPv4,
-					Transport:   models.NrfNfManagementTransportProtocol_TCP,
-					Port:        int32(eirContext.SBIPort),
-				},
-			},
+			ApiPrefix:       GetIPUri(),
+			IpEndPoints:     GetIpEndPoint(),
 		}
 	}
 
-	return
+	return nil
 }
 
-func GetIPv4Uri() string {
-	return fmt.Sprintf("%s://%s:%d", eirContext.UriScheme, eirContext.RegisterIPv4, eirContext.SBIPort)
+func GetIPUri() string {
+	port := eirContext.SBIPort
+	addr := eirContext.RegisterIP
+
+	return fmt.Sprintf("%s://%s", eirContext.UriScheme, netip.AddrPortFrom(addr, uint16(port)).String())
 }
 
-func (context *EIRContext) GetIPv4GroupUri(eirServiceType EIRServiceType) string {
-	var serviceUri string
-
-	switch eirServiceType {
-	case N5G_DR:
-		serviceUri = factory.EirDrResUriPrefix
-	default:
-		serviceUri = ""
+func GetIpEndPoint() []models.IpEndPoint {
+	if eirContext.RegisterIP.Is6() {
+		return []models.IpEndPoint{
+			{
+				Ipv6Address: eirContext.RegisterIP.String(),
+				Transport:   models.NrfNfManagementTransportProtocol_TCP,
+				Port:        int32(eirContext.SBIPort),
+			},
+		}
+	} else if eirContext.RegisterIP.Is4() {
+		return []models.IpEndPoint{
+			{
+				Ipv4Address: eirContext.RegisterIP.String(),
+				Transport:   models.NrfNfManagementTransportProtocol_TCP,
+				Port:        int32(eirContext.SBIPort),
+			},
+		}
 	}
-
-	return fmt.Sprintf("%s://%s:%d%s", context.UriScheme, context.RegisterIPv4, context.SBIPort, serviceUri)
+	return nil
 }
 
 // Create new EIR context

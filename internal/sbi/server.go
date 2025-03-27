@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"net/netip"
 
 	"github.com/gin-gonic/gin"
 
@@ -86,8 +87,16 @@ func (s *Server) shutdownHttpServer() {
 
 func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Server, error) {
 	sbiConfig := eir.Config().Configuration.Sbi
-	bindAddr := fmt.Sprintf("%s:%d", sbiConfig.BindingIPv4, sbiConfig.Port)
+	port := sbiConfig.Port
+	addr, err := netip.ParseAddr(sbiConfig.BindingIP)
+	if err != nil {
+		logger.SBILog.Errorf("BindingIP isn't a valid IP: %+v", err)
+		return nil, err
+	}
+	
+	bindAddr := netip.AddrPortFrom(addr, uint16(port)).String()
 
+	logger.SBILog.Infof("Binding addr: [%s]", bindAddr)
 	return httpwrapper.NewHttp2Server(bindAddr, tlsKeyLogPath, router)
 }
 
