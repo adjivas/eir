@@ -38,6 +38,8 @@ type EirApp struct {
 var _ app.App = &EirApp{}
 
 func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*EirApp, error) {
+	eir_context.Init()
+
 	eir := &EirApp{
 		cfg:    cfg,
 		eirCtx: eir_context.GetSelf(),
@@ -48,7 +50,6 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 	eir.SetLogEnable(cfg.GetLogEnable())
 	eir.SetLogLevel(cfg.GetLogLevel())
 	eir.SetReportCaller(cfg.GetLogReportCaller())
-	eir_context.Init()
 
 	processor := processor.NewProcessor(eir)
 	eir.processor = processor

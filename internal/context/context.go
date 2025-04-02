@@ -190,7 +190,7 @@ func initNfService(serviceName []models.ServiceName, version string) (
 		}
 	}
 
-	return nil
+	return nfService
 }
 
 func GetIPUri() string {
