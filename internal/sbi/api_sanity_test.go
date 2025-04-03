@@ -262,12 +262,6 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 		}
 	}()
 
-	filter := bson.M{"pei": nil}
-	pei := bson.M{"pei": "imei-42", "equipement_status": "WHITELISTED"}
-	res, err := mongoapi.RestfulAPIPutOne("policyData.ues.eirData", filter, pei)
-	assert.Equal(t, res, false)
-	assert.Nil(t, err)
-
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
