@@ -26,14 +26,23 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 
 	data, p_equipement_status := p.GetDataFromDB(collName, filter)
 	if p_equipement_status != nil {
-		problemDetail := models.ProblemDetails{
-			Title:  "The equipment identify checking has failed",
-			Status: http.StatusNotFound,
-			Detail: "The Equipment Status wasn't found",
-			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
-		}
-		logger.CallbackLog.Errorf("The Equipment Status wasn't found")
-		c.JSON(http.StatusNotFound, problemDetail)
+		
+		if defaultStatus := p.Config().Configuration.DefaultStatus; defaultStatus != "" {
+			logger.CallbackLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
+			response := util.ToBsonM(eir_models.EirResponseData{
+				Status: defaultStatus,
+			})
+			c.JSON(http.StatusOK, response)
+		} else {
+			logger.CallbackLog.Errorln("The Equipment Status wasn't found")
+			problemDetail := models.ProblemDetails{
+				Title:  "The equipment identify checking has failed",
+				Status: http.StatusNotFound,
+				Detail: "The Equipment Status wasn't found",
+				Cause:  "ERROR_EQUIPMENT_UNKNOWN",
+			}
+			c.JSON(http.StatusNotFound, problemDetail)
+	    }
 	} else {
 		response := util.ToBsonM(eir_models.EirResponseData{
 			Status: data["equipement_status"].(string),

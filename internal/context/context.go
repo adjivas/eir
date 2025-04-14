@@ -59,6 +59,7 @@ type EIRContext struct {
 	RegisterIP                              netip.Addr // IP register to NRF
 	BindingIP                               netip.Addr
 	SBIPort                                 int
+	DefaultStatus                           string
 	NfService                               map[models.ServiceName]models.NrfNfManagementNfService
 	HttpIPv6Address                         string
 	NfId                                    string
@@ -147,11 +148,16 @@ func initEirContext() {
 		logger.UtilLog.Info("Parsing RegisterIP address from ENV Variable.")
 		sbi.RegisterIP = registerIP
 	}
+
 	eirContext.BindingIP = resolveIP(sbi.BindingIP)
 	eirContext.RegisterIP = resolveIP(sbi.RegisterIP)
 
 	eirContext.NrfUri = configuration.NrfUri
 	eirContext.NrfCertPem = configuration.NrfCertPem
+
+	if defaultStatus := configuration.DefaultStatus; defaultStatus != "" {
+		eirContext.DefaultStatus = defaultStatus
+	}
 
 	fmt.Println("eir context = ", &eirContext)
 }

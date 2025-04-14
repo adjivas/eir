@@ -3,6 +3,7 @@ info:
   description: EIR initial local configuration
 
 configuration:
+  defaultStatus: "WHITELISTED"
   sbi: # Service-based interface information
     scheme: http # the protocol for sbi (http or https)
     registerIP: 127.0.0.7 # IP used to register to NRF

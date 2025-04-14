@@ -49,6 +49,12 @@ type Info struct {
 	Description string `yaml:"description,omitempty" valid:"type(string),optional"`
 }
 
+type Logger struct {
+	Enable       bool   `yaml:"enable" valid:"type(bool)"`
+	Level        string `yaml:"level" valid:"required,in(trace|debug|info|warn|error|fatal|panic)"`
+	ReportCaller bool   `yaml:"reportCaller" valid:"type(bool)"`
+}
+
 const (
 	EIR_DEFAULT_IP       = "127.0.0.4"
 	EIR_DEFAULT_PORT     = "8000"
@@ -57,16 +63,11 @@ const (
 
 type Configuration struct {
 	Sbi             *Sbi     `yaml:"sbi" valid:"required"`
+	DefaultStatus   string   `yaml:"defaultStatus" valid:"in(WHITELISTED|BLACKLISTED),optional"`
 	DbConnectorType DbType   `yaml:"dbConnectorType" valid:"required,in(mongodb)"`
 	Mongodb         *Mongodb `yaml:"mongodb" valid:"optional"`
 	NrfUri          string   `yaml:"nrfUri" valid:"url,required"`
 	NrfCertPem      string   `yaml:"nrfCertPem,omitempty" valid:"optional"`
-}
-
-type Logger struct {
-	Enable       bool   `yaml:"enable" valid:"type(bool)"`
-	Level        string `yaml:"level" valid:"required,in(trace|debug|info|warn|error|fatal|panic)"`
-	ReportCaller bool   `yaml:"reportCaller" valid:"type(bool)"`
 }
 
 func (c *Configuration) validate() (bool, error) {

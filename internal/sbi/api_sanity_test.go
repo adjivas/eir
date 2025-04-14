@@ -323,3 +323,101 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 		require.Equal(t, http.StatusNotFound, rsp.Code)
 	})
 }
+
+func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.Engine {
+	router := util_logger.NewGinWithLogrus(logger.GinLog)
+	equipementStatusGroup := router.Group(factory.EirDrResUriPrefix)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	eir := NewMockEIR(ctrl)
+	factory.EirConfig = &factory.Config{
+		Configuration: &factory.Configuration{
+			DbConnectorType: "mongodb",
+			Mongodb:         &factory.Mongodb{},
+			Sbi: &factory.Sbi{
+				BindingIP: "127.0.0.1",
+				Port:      8000,
+			},
+			DefaultStatus: defaultStatus,
+		},
+	}
+	eir.EXPECT().
+		Config().
+		Return(factory.EirConfig).
+		AnyTimes()
+
+	processor := processor.NewProcessor(eir)
+	eir.EXPECT().Processor().Return(processor).AnyTimes()
+
+	s := NewServer(eir, "")
+	equipementStatusRoutes := s.getEquipementStatusRoutes()
+	AddService(equipementStatusGroup, equipementStatusRoutes)
+	return router
+}
+
+func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusBlack(t *testing.T) {
+	server := setupHttpServerWithDefaultStatus(t, "BLACKLISTED")
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(eir_models.EirResponseData{
+		Status: "BLACKLISTED",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := eir_models.EirResponseData{}
+
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusOK, rsp.Code)
+	})
+}
+
+func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusWhite(t *testing.T) {
+	server := setupHttpServerWithDefaultStatus(t, "WHITELISTED")
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(eir_models.EirResponseData{
+		Status: "WHITELISTED",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := eir_models.EirResponseData{}
+
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusOK, rsp.Code)
+	})
+}
