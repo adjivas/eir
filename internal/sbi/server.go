@@ -13,11 +13,10 @@ import (
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/gin-gonic/gin"
-
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/httpwrapper"
 	logger_util "github.com/free5gc/util/logger"
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {

@@ -14,10 +14,9 @@ import (
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/google/uuid"
-
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/oauth"
+	"github.com/google/uuid"
 )
 
 var eirContext = EIRContext{}

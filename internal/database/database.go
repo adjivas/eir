@@ -4,9 +4,8 @@ import (
 	"github.com/adjivas/eir/internal/database/mongodb"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
-	"go.mongodb.org/mongo-driver/bson"
-
 	"github.com/free5gc/openapi/models"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (

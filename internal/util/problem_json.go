@@ -3,9 +3,8 @@ package util
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/free5gc/openapi/models"
+	"github.com/gin-gonic/gin"
 )
 
 func GinProblemJson(c *gin.Context, pd *models.ProblemDetails) {
