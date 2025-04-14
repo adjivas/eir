@@ -32,21 +32,12 @@ const (
 
 func Init() {
 	eirContext.Name = "eir"
-	eirContext.EeSubscriptionIDGenerator = 1
-	eirContext.SdmSubscriptionIDGenerator = 1
-	eirContext.SubscriptionDataSubscriptionIDGenerator = 1
-	eirContext.PolicyDataSubscriptionIDGenerator = 1
-	eirContext.SubscriptionDataSubscriptions = make(map[subsId]*models.SubscriptionDataSubscriptions)
-	eirContext.PolicyDataSubscriptions = make(map[subsId]*models.PolicyDataSubscription)
-	eirContext.InfluenceDataSubscriptionIDGenerator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 
 	serviceName := []models.ServiceName{
 		models.ServiceName_N5G_EIR_EIC,
 	}
 
-	addr := eirContext.RegisterIP
-	port := 29510
-	eirContext.NrfUri = fmt.Sprintf("%s://%s", models.UriScheme_HTTPS, netip.AddrPortFrom(addr, uint16(port)).String())
+	eirContext.NrfUri = GetIPUri()
 	initEirContext()
 
 	config := factory.EirConfig

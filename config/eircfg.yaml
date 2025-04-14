@@ -3,11 +3,11 @@ info:
   description: EIR initial local configuration
 
 configuration:
-  defaultStatus: "WHITELISTED"
+  defaultStatus: "BLACKLISTED"
   sbi: # Service-based interface information
     scheme: http # the protocol for sbi (http or https)
-    registerIP: 127.0.0.7 # IP used to register to NRF
-    bindingIP: 127.0.0.7  # IP used to bind the service
+    registerIP: 127.0.0.83 # IP used to register to NRF
+    bindingIP: 127.0.0.83  # IP used to bind the service
     # registerIP: "2001:db8::1:0:0:7" # IP used to register to NRF
     # bindingIP: "2001:db8::1:0:0:7"  # IP used to bind the service
     port: 8000 # port used to bind the service
