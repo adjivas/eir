@@ -15,10 +15,8 @@ import (
 
 var EirConfig *Config
 
-// TODO: Support configuration update from REST api
 func InitConfigFactory(f string, cfg *Config) error {
 	if f == "" {
-		// Use default config path
 		f = EirDefaultConfigPath
 	}
 	if content, err := os.ReadFile(f); err != nil {
