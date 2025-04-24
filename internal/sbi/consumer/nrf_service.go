@@ -130,14 +130,19 @@ func (ns *NrfService) SendDeregisterNFInstance() (err error) {
 	configuration.SetBasePath(eirSelf.NrfUri)
 	client := ns.getNFManagementClient(eirSelf.NrfUri)
 
-	deregisterReq := &NFManagement.DeregisterNFInstanceRequest{
-		NfInstanceID: &eirSelf.NfId,
+	if eirSelf.NfId == "" {
+		logger.ConsumerLog.Warnf("The EIR haven't a NFId : %+v", eirSelf)
+		return nil
+	} else {
+		deregisterReq := &NFManagement.DeregisterNFInstanceRequest{
+			NfInstanceID: &eirSelf.NfId,
+		}
+		_, deregisterErr := client.NFInstanceIDDocumentApi.DeregisterNFInstance(context.TODO(), deregisterReq)
+		if deregisterErr != nil {
+			return deregisterErr
+		}
+		return nil
 	}
-	_, deregisterErr := client.NFInstanceIDDocumentApi.DeregisterNFInstance(context.TODO(), deregisterReq)
-	if deregisterErr != nil {
-		return deregisterErr
-	}
-	return nil
 }
 
 func (ns *NrfService) SendSearchNFInstances(nrfUri string,
