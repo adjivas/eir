@@ -150,12 +150,6 @@ func (a *EirApp) deregisterFromNrf() {
 }
 
 func (a *EirApp) Start() {
-	err := a.registerToNrf(a.ctx)
-	if err != nil {
-		logger.InitLog.Errorf("register to NRF failed: %v", err)
-	} else {
-		logger.InitLog.Infof("register to NRF successfully")
-	}
 
 	// get config file info
 	config := factory.EirConfig
@@ -165,6 +159,14 @@ func (a *EirApp) Start() {
 	if err := mongoapi.SetMongoDB(mongodb.Name, mongodb.Url); err != nil {
 		logger.InitLog.Errorf("EIR start set MongoDB error: %+v", err)
 		return
+	}
+
+	// Register to Nrf
+	err := a.registerToNrf(a.ctx)
+	if err != nil {
+		logger.InitLog.Errorf("register to NRF failed: %v", err)
+	} else {
+		logger.InitLog.Infof("register to NRF successfully")
 	}
 
 	// Graceful deregister when panic
