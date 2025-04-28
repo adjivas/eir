@@ -44,7 +44,7 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 			Detail: "The PEI is missing",
 			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 		}
-		logger.CallbackLog.Errorf("The PEI is missing")
+		logger.HttpLog.Errorf("The PEI is missing")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
 		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei, supi, gpsi)

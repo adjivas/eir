@@ -27,13 +27,13 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 	if p_equipement_status != nil {
 
 		if defaultStatus := p.Config().Configuration.DefaultStatus; defaultStatus != "" {
-			logger.CallbackLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
+			logger.ProcLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
 			response := util.ToBsonM(eir_models.EirResponseData{
 				Status: defaultStatus,
 			})
 			c.JSON(http.StatusOK, response)
 		} else {
-			logger.CallbackLog.Errorln("The Equipment Status wasn't found")
+			logger.ProcLog.Errorln("The Equipment Status wasn't found")
 			problemDetail := models.ProblemDetails{
 				Title:  "The equipment identify checking has failed",
 				Status: http.StatusNotFound,
