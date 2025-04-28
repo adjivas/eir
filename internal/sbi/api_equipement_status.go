@@ -40,7 +40,7 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 	if pei == "" {
 		problemDetail := models.ProblemDetails{
 			Title:  "The equipment identify checking has failed",
-			Status: http.StatusNotFound,
+			Status: http.StatusBadRequest,
 			Detail: "The PEI is missing",
 			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 		}

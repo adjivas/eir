@@ -306,7 +306,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 
 	expected_message := util.ToBsonM(models.ProblemDetails{
 		Title:  "The equipment identify checking has failed",
-		Status: http.StatusNotFound,
+		Status: http.StatusBadRequest,
 		Detail: "The PEI is missing",
 		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 	})
