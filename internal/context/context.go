@@ -3,14 +3,11 @@ package context
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"net"
 	"net/netip"
 	"os"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
@@ -20,14 +17,6 @@ import (
 )
 
 var eirContext = EIRContext{}
-
-type subsId = string
-
-type EIRServiceType int
-
-const (
-	N5G_DR EIRServiceType = iota
-)
 
 func Init() {
 	eirContext.Name = "eir"
@@ -44,44 +33,18 @@ func Init() {
 }
 
 type EIRContext struct {
-	Name                                    string
-	UriScheme                               models.UriScheme
-	RegisterIP                              netip.Addr // IP register to NRF
-	BindingIP                               netip.Addr
-	SBIPort                                 int
-	DefaultStatus                           string
-	NfService                               map[models.ServiceName]models.NrfNfManagementNfService
-	HttpIPv6Address                         string
-	NfId                                    string
-	NrfUri                                  string
-	NrfCertPem                              string
-	EeSubscriptionIDGenerator               int
-	SdmSubscriptionIDGenerator              int
-	SubscriptionDataSubscriptionIDGenerator int
-	PolicyDataSubscriptionIDGenerator       int
-	InfluenceDataSubscriptionIDGenerator    *rand.Rand
-	UESubsCollection                        sync.Map // map[ueId]*UESubsData
-	UEGroupCollection                       sync.Map // map[ueGroupId]*UEGroupSubsData
-	SubscriptionDataSubscriptions           map[subsId]*models.SubscriptionDataSubscriptions
-	PolicyDataSubscriptions                 map[subsId]*models.PolicyDataSubscription
-	InfluenceDataSubscriptions              sync.Map
-	appDataInfluDataSubscriptionIdGenerator uint64
-	mtx                                     sync.RWMutex
-	OAuth2Required                          bool
-}
-
-type UESubsData struct {
-	EeSubscriptionCollection map[subsId]*EeSubscriptionCollection
-	SdmSubscriptions         map[subsId]*models.SdmSubscription
-}
-
-type UEGroupSubsData struct {
-	EeSubscriptions map[subsId]*models.EeSubscription
-}
-
-type EeSubscriptionCollection struct {
-	EeSubscriptions      *models.EeSubscription
-	AmfSubscriptionInfos []models.AmfSubscriptionInfo
+	Name            string
+	UriScheme       models.UriScheme
+	RegisterIP      netip.Addr // IP register to NRF
+	BindingIP       netip.Addr
+	SBIPort         int
+	DefaultStatus   string
+	NfService       map[models.ServiceName]models.NrfNfManagementNfService
+	HttpIPv6Address string
+	NfId            string
+	NrfUri          string
+	NrfCertPem      string
+	OAuth2Required  bool
 }
 
 type NFContext interface {
@@ -89,35 +52,6 @@ type NFContext interface {
 }
 
 var _ NFContext = &EIRContext{}
-
-// Reset EIR Context
-func (context *EIRContext) Reset() {
-	context.UESubsCollection.Range(func(key, value interface{}) bool {
-		context.UESubsCollection.Delete(key)
-		return true
-	})
-	context.UEGroupCollection.Range(func(key, value interface{}) bool {
-		context.UEGroupCollection.Delete(key)
-		return true
-	})
-	for key := range context.SubscriptionDataSubscriptions {
-		delete(context.SubscriptionDataSubscriptions, key)
-	}
-	for key := range context.PolicyDataSubscriptions {
-		delete(context.PolicyDataSubscriptions, key)
-	}
-	context.InfluenceDataSubscriptions.Range(func(key, value interface{}) bool {
-		context.InfluenceDataSubscriptions.Delete(key)
-		return true
-	})
-	context.EeSubscriptionIDGenerator = 1
-	context.SdmSubscriptionIDGenerator = 1
-	context.SubscriptionDataSubscriptionIDGenerator = 1
-	context.PolicyDataSubscriptionIDGenerator = 1
-	context.InfluenceDataSubscriptionIDGenerator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
-	context.UriScheme = models.UriScheme_HTTPS
-	context.Name = "eir"
-}
 
 func initEirContext() {
 	config := factory.EirConfig
@@ -220,20 +154,6 @@ func GetIpEndPoint() []models.IpEndPoint {
 // Create new EIR context
 func GetSelf() *EIRContext {
 	return &eirContext
-}
-
-func (context *EIRContext) NewAppDataInfluDataSubscriptionID() uint64 {
-	context.mtx.Lock()
-	defer context.mtx.Unlock()
-	context.appDataInfluDataSubscriptionIdGenerator++
-	return context.appDataInfluDataSubscriptionIdGenerator
-}
-
-func NewInfluenceDataSubscriptionId() string {
-	if GetSelf().InfluenceDataSubscriptionIDGenerator == nil {
-		GetSelf().InfluenceDataSubscriptionIDGenerator = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
-	}
-	return fmt.Sprintf("%08x", GetSelf().InfluenceDataSubscriptionIDGenerator.Uint32())
 }
 
 func (c *EIRContext) GetTokenCtx(serviceName models.ServiceName, targetNF models.NrfNfManagementNfType) (
