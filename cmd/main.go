@@ -28,7 +28,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "eir"
-	app.Usage = "5G Unified Data Repository (EIR)"
+	app.Usage = "5G Equipment Identity Register (EIR)"
 	app.Action = action
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
