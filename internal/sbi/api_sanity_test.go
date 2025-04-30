@@ -310,6 +310,10 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 		Status: http.StatusBadRequest,
 		Detail: "The PEI is missing",
 		Cause:  "MANDATORY_IE_MISSING",
+		InvalidParams: []models.InvalidParam{{
+			Param: "PEI",
+			Reason: "The PEI is missing",
+		}},
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}

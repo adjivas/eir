@@ -64,8 +64,8 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 			Detail: "The PEI is missing",
 			Cause:  "MANDATORY_IE_MISSING",
 			InvalidParams: []models.InvalidParam{{
-				Param: "",
-				Reason: "",
+				Param: "PEI",
+				Reason: "The PEI is missing",
 			}},
 		}
 		logger.HttpLog.Errorf("The PEI is missing")
