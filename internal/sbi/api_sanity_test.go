@@ -309,7 +309,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 		Title:  "The equipment identify checking has failed",
 		Status: http.StatusBadRequest,
 		Detail: "The PEI is missing",
-		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
+		Cause:  "MANDATORY_IE_MISSING",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}

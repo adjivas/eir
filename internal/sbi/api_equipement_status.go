@@ -62,7 +62,7 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 			Title:  "The equipment identify checking has failed",
 			Status: http.StatusBadRequest,
 			Detail: "The PEI is missing",
-			Cause:  "ERROR_EQUIPMENT_UNKNOWN",
+			Cause:  "MANDATORY_IE_MISSING",
 		}
 		logger.HttpLog.Errorf("The PEI is missing")
 		c.JSON(http.StatusNotFound, problemDetail)
