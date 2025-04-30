@@ -13,6 +13,13 @@ To populate the database with EIR data, we can use that lines:
 > use free5gc
 > db.policyData.ues.eirData.insertOne( { "pei": "imeisv-4370816125816151", "equipement_status": "WHITELISTED" })
 ```
+
+To run and test this NF, we use this command lines:
+```shell
+% go run cmd/main.go --config config/eircfg.yaml
+% http://127.0.0.8:8000/n5g-eir-eic/v1/equipement-status?pei=imeisv-4370816125816151
+```
+
 We can consider to add a EquipmentStatus enum on the front of the Free5GC [Webconsole](https://github.com/free5gc/webconsole)
 
 Like every Free5gc NF service, this EIR NF is executable with the `go run cmd/main.go` command
