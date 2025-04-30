@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const maxURILength = 1024
+
 func (s *Server) getEquipementStatusRoutes() []Route {
 	return []Route{
 		{
@@ -22,6 +24,24 @@ func (s *Server) getEquipementStatusRoutes() []Route {
 			"/equipement-status",
 			s.HandleQueryEirEquipementStatus,
 		},
+	}
+}
+
+func URILengthLimiter() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if size := len(c.Request.URL.String()); size > maxURILength {
+			problemDetail := models.ProblemDetails{
+				Title:  "The equipment identify checking has failed",
+				Status: http.StatusRequestURITooLong,
+				Detail: "URI Too Long",
+				Cause:  "INCORRECT_URI_LENGTH",
+			}
+			logger.HttpLog.Errorf("The Request URI is too long (%d>%d)", size, maxURILength)
+			c.JSON(http.StatusRequestURITooLong, problemDetail)
+			c.Abort()
+			return
+		}
+		c.Next()
 	}
 }
 

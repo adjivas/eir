@@ -21,6 +21,7 @@ type RouteGroup interface {
 }
 
 func AddService(group *gin.RouterGroup, routes []Route) {
+	group.Use(URILengthLimiter())
 	for _, route := range routes {
 		switch route.Method {
 		case "GET":

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/adjivas/eir/internal/logger"
@@ -418,5 +419,42 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusWhite(t 
 
 		require.Equal(t, expected_message, message)
 		require.Equal(t, http.StatusOK, rsp.Code)
+	})
+}
+
+func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
+	server := setupHttpServer(t)
+	setupMongoDB(t)
+
+	defer func() {
+		if err := mongoapi.Drop("policyData.ues.eirData"); err != nil {
+			panic(err)
+		}
+	}()
+
+	imei := "imei-" + strings.Repeat("0", 4096)
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=" + imei
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(models.ProblemDetails{
+		Title:  "The equipment identify checking has failed",
+		Status: http.StatusRequestURITooLong,
+		Detail: "URI Too Long",
+		Cause:  "INCORRECT_URI_LENGTH",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := models.ProblemDetails{}
+
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusRequestURITooLong, rsp.Code)
 	})
 }
