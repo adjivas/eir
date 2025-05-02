@@ -24,21 +24,30 @@ import (
 )
 
 func setupHttpServer(t *testing.T) *gin.Engine {
+	return setupHttpServerWithDefaultStatus(t, "")
+}
+
+func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.Engine {
 	router := util_logger.NewGinWithLogrus(logger.GinLog)
 	equipementStatusGroup := router.Group(factory.EirDrResUriPrefix)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	eir := NewMockEIR(ctrl)
-	factory.EirConfig = &factory.Config{
-		Configuration: &factory.Configuration{
-			DbConnectorType: "mongodb",
-			Mongodb:         &factory.Mongodb{},
-			Sbi: &factory.Sbi{
-				BindingIP: "127.0.0.1",
-				Port:      8000,
-			},
+	configuration := factory.Configuration{
+		DbConnectorType: "mongodb",
+		Mongodb:         &factory.Mongodb{},
+		Sbi: &factory.Sbi{
+			BindingIP: "127.0.0.1",
+			Port:      8000,
 		},
+		DefaultStatus: defaultStatus,
+	}
+	if defaultStatus != "" {
+		configuration.DefaultStatus = defaultStatus  
+	}
+	factory.EirConfig = &factory.Config{
+		Configuration: &configuration,
 	}
 	eir.EXPECT().
 		Config().
@@ -53,6 +62,8 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 	AddService(equipementStatusGroup, equipementStatusRoutes)
 	return router
 }
+
+
 
 func setupMongoDB(t *testing.T) {
 	err := mongoapi.SetMongoDB("test5gc", "mongodb://localhost:27017")
@@ -326,38 +337,6 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 		require.Equal(t, expected_message, message)
 		require.Equal(t, http.StatusNotFound, rsp.Code)
 	})
-}
-
-func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.Engine {
-	router := util_logger.NewGinWithLogrus(logger.GinLog)
-	equipementStatusGroup := router.Group(factory.EirDrResUriPrefix)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	eir := NewMockEIR(ctrl)
-	factory.EirConfig = &factory.Config{
-		Configuration: &factory.Configuration{
-			DbConnectorType: "mongodb",
-			Mongodb:         &factory.Mongodb{},
-			Sbi: &factory.Sbi{
-				BindingIP: "127.0.0.1",
-				Port:      8000,
-			},
-			DefaultStatus: defaultStatus,
-		},
-	}
-	eir.EXPECT().
-		Config().
-		Return(factory.EirConfig).
-		AnyTimes()
-
-	processor := processor.NewProcessor(eir)
-	eir.EXPECT().Processor().Return(processor).AnyTimes()
-
-	s := NewServer(eir, "")
-	equipementStatusRoutes := s.getEquipementStatusRoutes()
-	AddService(equipementStatusGroup, equipementStatusRoutes)
-	return router
 }
 
 func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusBlack(t *testing.T) {
