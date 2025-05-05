@@ -63,8 +63,6 @@ func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.E
 	return router
 }
 
-
-
 func setupMongoDB(t *testing.T) {
 	err := mongoapi.SetMongoDB("test5gc", "mongodb://localhost:27017")
 	require.Nil(t, err)
@@ -439,5 +437,37 @@ func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
 
 		require.Equal(t, expected_message, message)
 		require.Equal(t, http.StatusRequestURITooLong, rsp.Code)
+	})
+}
+
+func TestEIR_EquipementStatus_WithoutDatabase(t *testing.T) {
+	server := setupHttpServer(t)
+	mongoapi.Client.Disconnect(context.Background()) // The reason of the error
+
+	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=012345678901234"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
+	require.Nil(t, err)
+	rsp := httptest.NewRecorder()
+	server.ServeHTTP(rsp, req)
+
+	expected_message := util.ToBsonM(models.ProblemDetails{
+		Title:  "The equipment identify checking has failed",
+		Status: http.StatusInternalServerError,
+		Detail: "RestfulAPIGetOne err: client is disconnected",
+		Cause:  "INSUFFICIENT_RESOURCES",
+	})
+	t.Run("EquipementStatus", func(t *testing.T) {
+		json_message := models.ProblemDetails{}
+
+		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
+		assert.Nil(t, err)
+
+		message := util.ToBsonM(json_message)
+
+		logger.UtilLog.Info(message)
+		logger.UtilLog.Info(rsp.Code)
+		require.Equal(t, expected_message, message)
+		require.Equal(t, http.StatusInternalServerError, rsp.Code)
 	})
 }
