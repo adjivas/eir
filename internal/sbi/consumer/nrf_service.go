@@ -123,6 +123,12 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 func (ns *NrfService) SendDeregisterNFInstance() (err error) {
 	logger.ConsumerLog.Infof("Send Deregister NFInstance")
 
+	ctx, pd, err := eir_context.GetSelf().GetTokenCtx(models.ServiceName_NNRF_NFM, models.NrfNfManagementNfType_NRF)
+	if err != nil {
+		logger.ConsumerLog.Errorf("Get token context failed: problem details: %+v", pd)
+		return err
+	}
+
 	eirSelf := eir_context.GetSelf()
 
 	// Set client and set url
@@ -137,7 +143,7 @@ func (ns *NrfService) SendDeregisterNFInstance() (err error) {
 		deregisterReq := &NFManagement.DeregisterNFInstanceRequest{
 			NfInstanceID: &eirSelf.NfId,
 		}
-		_, deregisterErr := client.NFInstanceIDDocumentApi.DeregisterNFInstance(context.TODO(), deregisterReq)
+		_, deregisterErr := client.NFInstanceIDDocumentApi.DeregisterNFInstance(ctx, deregisterReq)
 		if deregisterErr != nil {
 			return deregisterErr
 		}
