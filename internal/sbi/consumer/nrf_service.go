@@ -123,7 +123,7 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 func (ns *NrfService) SendDeregisterNFInstance() (err error) {
 	logger.ConsumerLog.Infof("Send Deregister NFInstance")
 
-	ctx, pd, err := eir_context.GetSelf().GetTokenCtx(models.ServiceName_NNRF_NFM, models.NrfNfManagementNfType_NRF)
+	ctx, pd, err := eir_context.GetSelf().GetTokenCtx(models.ServiceName_N5G_EIR_EIC, models.NrfNfManagementNfType_NRF)
 	if err != nil {
 		logger.ConsumerLog.Errorf("Get token context failed: problem details: %+v", pd)
 		return err
