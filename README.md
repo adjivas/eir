@@ -5,7 +5,7 @@ It's destined to be reviewed by the Free5GC team
 
 The Free5GC haven't a native support of the EIR NF, it's why this repository should be tested with this PR:
 - [!4](https://github.com/adjivas/amf/pull/4) adds to the AMF the N17 EIR verification step
-- [!1](https://github.com/adjivas/nrf/pull/1/files) adapts nRF to provide a EIR registration/deregistration notifications
+- [!1](https://github.com/adjivas/nrf/pull/3) adapts nRF to provide a EIR registration/deregistration notifications
 
 To populate the database with EIR data, we can use that lines:
 ```shell
