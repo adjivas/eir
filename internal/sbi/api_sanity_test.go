@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/adjivas/eir/internal/logger"
-	eir_models "github.com/adjivas/eir/internal/models"
+	eir_models "github.com/adjivas/openapi/models"
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
