@@ -14,7 +14,7 @@ configuration:
     tls: # the local path of TLS key
       pem: cert/eir.pem # EIR TLS Certificate
       key: cert/eir.key # EIR TLS Private key
-    oauth: false
+    oauth: true
   dbConnectorType: mongodb 
   mongodb:
     name: free5gc # Database name in MongoDB
