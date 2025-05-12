@@ -10,10 +10,8 @@ import (
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi/processor"
-	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
-	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/httpwrapper"
 	logger_util "github.com/free5gc/util/logger"
 	"github.com/gin-gonic/gin"
@@ -100,12 +98,9 @@ func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Se
 func newRouter(s *Server) *gin.Engine {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
 
-	dataRepositoryGroup := router.Group(factory.EirDrResUriPrefix)
-	dataRepositoryGroup.Use(func(c *gin.Context) {
-		util.NewRouterAuthorizationCheck(models.ServiceName_N5G_EIR_EIC).Check(c, s.Context())
-	})
+	eirHttpCallBackGroup := router.Group(factory.EirDrResUriPrefix)
 	equipementStatusRoutes := s.getEquipementStatusRoutes()
-	AddService(dataRepositoryGroup, equipementStatusRoutes)
+	AddService(eirHttpCallBackGroup, equipementStatusRoutes)
 
 	return router
 }
