@@ -442,7 +442,10 @@ func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
 
 func TestEIR_EquipementStatus_WithoutDatabase(t *testing.T) {
 	server := setupHttpServer(t)
-	mongoapi.Client.Disconnect(context.Background()) // The reason of the error
+	err := mongoapi.Client.Disconnect(context.Background()) // The reason of the error
+	if err != nil {
+		logger.UtilLog.Errorf("Failed to properly disconnect from the database")
+	}
 
 	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=012345678901234"
 

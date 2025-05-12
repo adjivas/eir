@@ -91,7 +91,6 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 			}
 			rsp, registerErr := client.NFInstanceIDDocumentApi.RegisterNFInstance(ctx, registerReq)
 			if registerErr != nil || rsp == nil {
-				// TODO : add log
 				logger.ConsumerLog.Errorf("EIR register to NRF Error[%s]", registerErr.Error())
 				time.Sleep(2 * time.Second)
 				continue

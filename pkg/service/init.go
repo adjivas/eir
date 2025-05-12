@@ -150,7 +150,6 @@ func (a *EirApp) deregisterFromNrf() {
 }
 
 func (a *EirApp) Start() {
-
 	// get config file info
 	config := factory.EirConfig
 	mongodb := config.Configuration.Mongodb

@@ -115,7 +115,7 @@ func (s *Server) unsecureServe() error {
 }
 
 func (s *Server) secureServe() error {
-	sbiConfig := s.EIR.Config()
+	sbiConfig := s.Config()
 
 	pemPath := sbiConfig.GetCertPemPath()
 	if pemPath == "" {
@@ -131,7 +131,7 @@ func (s *Server) secureServe() error {
 }
 
 func (s *Server) serve() error {
-	sbiConfig := s.EIR.Config().Configuration.Sbi
+	sbiConfig := s.Config().Configuration.Sbi
 
 	switch sbiConfig.Scheme {
 	case "http":

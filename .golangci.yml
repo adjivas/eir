@@ -1,3 +1,5 @@
+version: "2"
+
 # This file contains all available configuration options
 # with their default values.
 # options for analysis running
@@ -44,7 +46,9 @@ run:
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
-  formats: colored-line-number
+  format:
+    - format: colored-line-number
+      path: stdout
   # print lines of code with issue, default is true
   print-issued-lines: true
   # print linter name in the end of issue text, default is true
@@ -116,9 +120,9 @@ linters-settings:
       #- OPTIMIZE # marks code that should be optimized before merging
       #- HACK # marks hack-arounds that should be removed before merging
       - XXX # Fatal! Important problem
-  gofmt:
-    # simplify code: gofmt with `-s` option, true by default
-    simplify: true
+  formatters:
+    enable:
+      - gofmt
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
@@ -230,17 +234,14 @@ linters-settings:
 
 linters:
   enable:
-    - gofmt
     - govet
     - errcheck
     - staticcheck
     - unused
-    - gosimple
     # - structcheck
     # - varcheck
     - ineffassign
     # - deadcode
-    - typecheck
     # Additional
     - lll
     - godox
@@ -252,9 +253,7 @@ linters:
     # - gomodguard
     - nakedret
     # - golint
-    - gci
     - misspell
-    - gofumpt
     - whitespace
     - unconvert
     - predeclared
@@ -304,6 +303,7 @@ issues:
   # Show only new issues created in git patch with set file path.
   #new-from-patch: path/to/patch/file
 severity:
+  default: error
   # Default value is empty string.
   # Set the default severity for issues. If severity rules are defined and the issues
   # do not match or no severity is provided to the rule this will be the default

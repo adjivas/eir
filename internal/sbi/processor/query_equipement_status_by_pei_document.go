@@ -30,7 +30,8 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 		})
 		c.JSON(http.StatusOK, response)
 	} else {
-		if err_database.Cause == "DATA_NOT_FOUND" {
+		switch err_database.Cause {
+		case "DATA_NOT_FOUND":
 			if defaultStatus := p.Config().Configuration.DefaultStatus; defaultStatus != "" {
 				logger.ProcLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
 				response := util.ToBsonM(eir_models.EirResponseData{
@@ -47,7 +48,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 				}
 				c.JSON(http.StatusNotFound, problemDetail)
 			}
-		} else if err_database.Cause == "SYSTEM_FAILURE" {
+		case "SYSTEM_FAILURE":
 			logger.ProcLog.Errorf("The database has failed with [%v]", err_database.Detail)
 			problemDetail := models.ProblemDetails{
 				Title:  "The equipment identify checking has failed",
@@ -56,7 +57,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 				Cause:  "INSUFFICIENT_RESOURCES",
 			}
 			c.JSON(http.StatusInternalServerError, problemDetail)
-		} else {
+		default:
 			logger.ProcLog.Errorf("The NF has a unspecified failure with [%+v]", err_database)
 			problemDetail := models.ProblemDetails{
 				Title:  "The equipment identify checking has failed",

@@ -145,15 +145,15 @@ func appendInvalid(err error) error {
 
 	es := err.(govalidator.Errors).Errors()
 	for _, e := range es {
-		errs = append(errs, fmt.Errorf("Invalid %w", e))
+		errs = append(errs, fmt.Errorf("invalid %w", e))
 	}
 
 	return error(errs)
 }
 
 func (c *Config) GetVersion() string {
-	c.RWMutex.RLock()
-	defer c.RWMutex.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 
 	if c.Info.Version != "" {
 		return c.Info.Version
@@ -162,8 +162,8 @@ func (c *Config) GetVersion() string {
 }
 
 func (c *Config) SetLogEnable(enable bool) {
-	c.RWMutex.Lock()
-	defer c.RWMutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
@@ -177,8 +177,8 @@ func (c *Config) SetLogEnable(enable bool) {
 }
 
 func (c *Config) SetLogLevel(level string) {
-	c.RWMutex.Lock()
-	defer c.RWMutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
@@ -191,8 +191,8 @@ func (c *Config) SetLogLevel(level string) {
 }
 
 func (c *Config) SetLogReportCaller(reportCaller bool) {
-	c.RWMutex.Lock()
-	defer c.RWMutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
@@ -206,8 +206,8 @@ func (c *Config) SetLogReportCaller(reportCaller bool) {
 }
 
 func (c *Config) GetLogEnable() bool {
-	c.RWMutex.RLock()
-	defer c.RWMutex.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
 		return false
@@ -216,8 +216,8 @@ func (c *Config) GetLogEnable() bool {
 }
 
 func (c *Config) GetLogLevel() string {
-	c.RWMutex.RLock()
-	defer c.RWMutex.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
 		return "info"
@@ -226,8 +226,8 @@ func (c *Config) GetLogLevel() string {
 }
 
 func (c *Config) GetLogReportCaller() bool {
-	c.RWMutex.RLock()
-	defer c.RWMutex.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
 		return false
