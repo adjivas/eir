@@ -2,10 +2,11 @@ package consumer
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
@@ -71,39 +72,45 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 	// Set client and set url
 	profile, err := ns.buildNFProfile(eir_context.GetSelf())
 	if err != nil {
-		return "", "", fmt.Errorf("failed to build nrf profile %s", err.Error())
+		logger.ConsumerLog.Errorf("failed to build nrf profile %s", err.Error())
+		return "", "", err
 	}
 
 	configuration := NFManagement.NewConfiguration()
 	configuration.SetBasePath(nrfUri)
 	client := ns.getNFManagementClient(nrfUri)
 
-	finish := false
-
-	for !finish {
+	registerNfInstanceRequest := &NFManagement.RegisterNFInstanceRequest{
+		NfInstanceID:             &profile.NfInstanceId,
+		NrfNfManagementNfProfile: &profile,
+	}
+	var res *NFManagement.RegisterNFInstanceResponse
+	for {
 		select {
 		case <-ctx.Done():
-			return "", "", fmt.Errorf("context done")
+			return "", "", errors.Errorf("Context Cancel before RegisterNFInstance")
 		default:
-			registerReq := &NFManagement.RegisterNFInstanceRequest{
-				NfInstanceID:             &profile.NfInstanceId,
-				NrfNfManagementNfProfile: &profile,
-			}
-			rsp, registerErr := client.NFInstanceIDDocumentApi.RegisterNFInstance(ctx, registerReq)
-			if registerErr != nil || rsp == nil {
-				logger.ConsumerLog.Errorf("EIR register to NRF Error[%s]", registerErr.Error())
-				time.Sleep(2 * time.Second)
-				continue
-			}
+		}
 
-			resourceUri := rsp.Location
+		res, err = client.NFInstanceIDDocumentApi.RegisterNFInstance(ctx, registerNfInstanceRequest)
+		if err != nil || res == nil {
+			logger.ConsumerLog.Errorf("EIR register to NRF Error[%s]", err.Error())
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		if res.Location == "" {
+			// NFUpdate
+			break
+		} else {
+			resourceUri := res.Location
 			resourceNrfUri, _, _ = strings.Cut(resourceUri, "/nnrf-nfm/")
 			retrieveNfInstanceId = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
 
 			oauth2 := false
 
-			if rsp.NrfNfManagementNfProfile.CustomInfo != nil {
-				v, ok := rsp.NrfNfManagementNfProfile.CustomInfo["oauth2"].(bool)
+			if res.NrfNfManagementNfProfile.CustomInfo != nil {
+				v, ok := res.NrfNfManagementNfProfile.CustomInfo["oauth2"].(bool)
 				if ok {
 					oauth2 = v
 					logger.MainLog.Infoln("OAuth2 setting receive from NRF:", oauth2)
@@ -113,10 +120,10 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 			if oauth2 && eir_context.GetSelf().NrfCertPem == "" {
 				logger.CfgLog.Error("OAuth2 enable but no nrfCertPem provided in config.")
 			}
-			finish = true
+			break
 		}
 	}
-	return resourceNrfUri, retrieveNfInstanceId, nil
+	return resourceNrfUri, retrieveNfInstanceId, err
 }
 
 func (ns *NrfService) SendDeregisterNFInstance() (err error) {
@@ -139,10 +146,10 @@ func (ns *NrfService) SendDeregisterNFInstance() (err error) {
 		logger.ConsumerLog.Warnf("The EIR haven't a NFId : %+v", eirSelf)
 		return nil
 	} else {
-		deregisterReq := &NFManagement.DeregisterNFInstanceRequest{
+		deregisterNfInstanceRequest := &NFManagement.DeregisterNFInstanceRequest{
 			NfInstanceID: &eirSelf.NfId,
 		}
-		_, deregisterErr := client.NFInstanceIDDocumentApi.DeregisterNFInstance(ctx, deregisterReq)
+		_, deregisterErr := client.NFInstanceIDDocumentApi.DeregisterNFInstance(ctx, deregisterNfInstanceRequest)
 		if deregisterErr != nil {
 			return deregisterErr
 		}
