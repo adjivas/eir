@@ -1,17 +1,18 @@
 package mongodb
 
 import (
+	"net/http"
+
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/mongoapi"
 	"go.mongodb.org/mongo-driver/bson"
-	"net/http"
 )
 
 const (
-	EQUIPMENT_UNKNOWN = "Data not found"
+	EQUIPMENT_UNKNOWN       = "Data not found"
 	EQUIPMENT_UNKNOWN_CAUSE = "DATA_NOT_FOUND"
 )
 

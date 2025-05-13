@@ -2,10 +2,12 @@ module github.com/adjivas/eir
 
 go 1.21
 
+replace github.com/free5gc/openapi => github.com/adjivas/openapi v0.0.0-20250513155714-06a19ba444a8
+
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/evanphx/json-patch v0.5.2
-	github.com/free5gc/openapi v1.0.9-0.20250102055216-bb5814d1e736
+	github.com/free5gc/openapi v1.1.0
 	github.com/free5gc/util v1.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang/mock v1.4.4
@@ -20,7 +22,6 @@ require (
 )
 
 require (
-	github.com/adjivas/openapi v0.0.0-20250507165019-5bed4eb42ced // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect

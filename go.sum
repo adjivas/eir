@@ -35,6 +35,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/adjivas/openapi v0.0.0-20250507165019-5bed4eb42ced h1:3ll6tc1X/t7YFr5FEBRwL9e+F9V7RTbU0c9i6fiN9AY=
 github.com/adjivas/openapi v0.0.0-20250507165019-5bed4eb42ced/go.mod h1:bvg0VkDB2XmNL0BOuJovhAtwntN2GUZRWdM+1d0KDQ4=
+github.com/adjivas/openapi v0.0.0-20250513155714-06a19ba444a8 h1:S5hB/X83VGxHJP8W2TEVK1ZMyD/O3l2DPxPJHhReycQ=
+github.com/adjivas/openapi v0.0.0-20250513155714-06a19ba444a8/go.mod h1:R9FkFsiNeCCn1FxwsInsXg1UASuftqhERW8eZ+2URRA=
 github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d h1:Byv0BzEl3/e6D5CLfI0j/7hiIEtvGVFPCZ7Ei2oq8iQ=
 github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d/go.mod h1:WaHUgvxTVq04UNunO+XhnAqY/wQc+bxr74GqbsZ/Jqw=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=

@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/adjivas/eir/internal/logger"
-	eir_models "github.com/adjivas/openapi/models"
 	"github.com/adjivas/eir/internal/util"
+	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
 	"github.com/free5gc/openapi/models"
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +25,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 
 	data, err_database := p.GetDataFromDB(collName, filter)
 	if err_database == nil {
-		response := util.ToBsonM(eir_models.EirResponseData{
+		response := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 			Status: data["equipement_status"].(string),
 		})
 		c.JSON(http.StatusOK, response)
@@ -34,7 +34,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 		case "DATA_NOT_FOUND":
 			if defaultStatus := p.Config().Configuration.DefaultStatus; defaultStatus != "" {
 				logger.ProcLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
-				response := util.ToBsonM(eir_models.EirResponseData{
+				response := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 					Status: defaultStatus,
 				})
 				c.JSON(http.StatusOK, response)

@@ -6,15 +6,15 @@ configuration:
   defaultStatus: "BLACKLISTED"
   sbi: # Service-based interface information
     scheme: http # the protocol for sbi (http or https)
-    registerIP: 127.0.0.53 # IP used to register to NRF
-    bindingIP: 127.0.0.53  # IP used to bind the service
+    oauth: false
+    registerIP: 127.0.0.54 # IP used to register to NRF
+    bindingIP: 127.0.0.54  # IP used to bind the service
     # registerIP: "2001:db8::1:0:0:7" # IP used to register to NRF
     # bindingIP: "2001:db8::1:0:0:7"  # IP used to bind the service
     port: 8000 # port used to bind the service
     tls: # the local path of TLS key
       pem: cert/eir.pem # EIR TLS Certificate
       key: cert/eir.key # EIR TLS Private key
-    oauth: true
   dbConnectorType: mongodb 
   mongodb:
     name: free5gc # Database name in MongoDB

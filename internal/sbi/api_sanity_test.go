@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/adjivas/eir/internal/logger"
-	eir_models "github.com/adjivas/openapi/models"
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
+	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
 	"github.com/free5gc/openapi/models"
 	util_logger "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/mongoapi"
@@ -44,7 +44,7 @@ func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.E
 		DefaultStatus: defaultStatus,
 	}
 	if defaultStatus != "" {
-		configuration.DefaultStatus = defaultStatus  
+		configuration.DefaultStatus = defaultStatus
 	}
 	factory.EirConfig = &factory.Config{
 		Configuration: &configuration,
@@ -109,11 +109,11 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_models.EirResponseData{}
+		json_message := eir_api_service.EIREquipementStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -151,11 +151,11 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_models.EirResponseData{}
+		json_message := eir_api_service.EIREquipementStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -193,11 +193,11 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_models.EirResponseData{}
+		json_message := eir_api_service.EIREquipementStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -245,11 +245,11 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_models.EirResponseData{}
+		json_message := eir_api_service.EIREquipementStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -320,7 +320,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 		Detail: "The PEI is missing",
 		Cause:  "MANDATORY_IE_MISSING",
 		InvalidParams: []models.InvalidParam{{
-			Param: "PEI",
+			Param:  "PEI",
 			Reason: "The PEI is missing",
 		}},
 	})
@@ -354,11 +354,11 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusBlack(t 
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 		Status: "BLACKLISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_models.EirResponseData{}
+		json_message := eir_api_service.EIREquipementStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -387,11 +387,11 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusWhite(t 
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_models.EirResponseData{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 		Status: "WHITELISTED",
 	})
 	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_models.EirResponseData{}
+		json_message := eir_api_service.EIREquipementStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
