@@ -3,6 +3,7 @@ package sbi
 import (
 	"net/http"
 
+	"github.com/adjivas/eir/internal/metrics/sbi"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/free5gc/openapi/models"
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,7 @@ func URILengthLimiter() gin.HandlerFunc {
 				Cause:  "INCORRECT_URI_LENGTH",
 			}
 			logger.HttpLog.Errorf("The Request URI is too long (%d>%d)", size, maxURILength)
+			c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetail)
 			c.JSON(http.StatusRequestURITooLong, problemDetail)
 			c.Abort()
 			return
@@ -69,6 +71,7 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 			}},
 		}
 		logger.HttpLog.Errorf("The PEI is missing")
+		c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetail)
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
 		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei, supi, gpsi)

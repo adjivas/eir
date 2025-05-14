@@ -3,6 +3,7 @@ package processor
 import (
 	"net/http"
 
+	"github.com/adjivas/eir/internal/metrics/sbi"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/util"
 	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
@@ -46,6 +47,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 					Detail: "The Equipment Status wasn't found",
 					Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 				}
+				c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetail)
 				c.JSON(http.StatusNotFound, problemDetail)
 			}
 		case "SYSTEM_FAILURE":
@@ -57,6 +59,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 				Cause:  "INSUFFICIENT_RESOURCES",
 			}
 			c.JSON(http.StatusInternalServerError, problemDetail)
+			c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetail)
 		default:
 			logger.ProcLog.Errorf("The NF has a unspecified failure with [%+v]", err_database)
 			problemDetail := models.ProblemDetails{
@@ -66,6 +69,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 				Cause:  "INSUFFICIENT_RESOURCES",
 			}
 			c.JSON(http.StatusInternalServerError, problemDetail)
+			c.Set(sbi.IN_PB_DETAILS_CTX_STR, problemDetail)
 		}
 	}
 }
