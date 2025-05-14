@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/adjivas/eir/internal/sbi/middleware"
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
@@ -97,6 +98,8 @@ func bindRouter(eir app.App, router *gin.Engine, tlsKeyLogPath string) (*http.Se
 
 func newRouter(s *Server) *gin.Engine {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
+
+	router.Use(middleware.InboundMetrics())
 
 	eirHttpCallBackGroup := router.Group(factory.EirDrResUriPrefix)
 	equipementStatusRoutes := s.getEquipementStatusRoutes()

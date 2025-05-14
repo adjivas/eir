@@ -20,6 +20,8 @@ func Init(cfg *factory.Config) *prometheus.Registry {
 	// Append here the collector you want to register to the prometheus registry
 
 	eirMetrics = append(eirMetrics, sbi.GetSbiOutboundMetrics(namespace)...)
+	
+	eirMetrics = append(eirMetrics, sbi.GetSbiInboundMetrics(namespace)...)
 
 	initMetric(eirMetrics, reg)
 
