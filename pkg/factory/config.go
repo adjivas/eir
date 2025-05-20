@@ -30,7 +30,7 @@ type Config struct {
 	Info          *Info          `yaml:"info" valid:"required"`
 	Configuration *Configuration `yaml:"configuration" valid:"required"`
 	Logger        *Logger        `yaml:"logger" valid:"required"`
-	mu sync.RWMutex
+	mu            sync.RWMutex
 }
 
 func (c *Config) Validate() (bool, error) {
