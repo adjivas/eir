@@ -10,7 +10,7 @@ import (
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/asaskevich/govalidator"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 var EirConfig *Config

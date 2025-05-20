@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/adjivas/eir/internal/sbi/processor"
+	processor "github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/util/httpwrapper"
@@ -18,7 +18,7 @@ import (
 )
 
 type Server struct {
-	EIR
+	eir EIR
 
 	httpServer *http.Server
 	router     *gin.Engine
@@ -32,7 +32,7 @@ type EIR interface {
 
 func NewServer(eir EIR, tlsKeyLogPath string) *Server {
 	s := &Server{
-		EIR: eir,
+		eir: eir,
 	}
 
 	s.router = newRouter(s)
@@ -110,7 +110,7 @@ func (s *Server) unsecureServe() error {
 }
 
 func (s *Server) secureServe() error {
-	sbiConfig := s.Config()
+	sbiConfig := s.eir.Processor().App.Config()
 
 	pemPath := sbiConfig.GetCertPemPath()
 	if pemPath == "" {
@@ -126,7 +126,7 @@ func (s *Server) secureServe() error {
 }
 
 func (s *Server) serve() error {
-	sbiConfig := s.Config().Configuration.Sbi
+	sbiConfig := s.eir.Processor().App.Config().Configuration.Sbi
 
 	switch sbiConfig.Scheme {
 	case "http":
