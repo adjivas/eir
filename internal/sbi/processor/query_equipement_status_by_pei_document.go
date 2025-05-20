@@ -23,7 +23,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 		filter["gpsi"] = gpsi
 	}
 
-	data, err_database := p.GetDataFromDB(collName, filter)
+	data, err_database := p.DbConnector.GetDataFromDB(collName, filter)
 	if err_database == nil {
 		response := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 			Status: data["equipement_status"].(string),
@@ -32,7 +32,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 	} else {
 		switch err_database.Cause {
 		case "DATA_NOT_FOUND":
-			if defaultStatus := p.Config().Configuration.DefaultStatus; defaultStatus != "" {
+			if defaultStatus := p.App.Config().Configuration.DefaultStatus; defaultStatus != "" {
 				logger.ProcLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
 				response := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
 					Status: defaultStatus,
