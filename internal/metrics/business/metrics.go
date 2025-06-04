@@ -2,6 +2,7 @@ package business
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/adjivas/eir/internal/logger"
 )
 
 var (
@@ -42,6 +43,10 @@ func GetEquipmentStatusMetrics(namespace string) []prometheus.Collector {
 }
 
 func IncrEquipmentStatusFailCounter(eirStatus string, eirType string) {
+	if EirEquipmentStatusFailCounter == nil {
+		logger.MetricsLog.Errorln("EirEquipmentStatusFailCounter hasn't set")
+		return
+	}
 	EirEquipmentStatusFailCounter.With(prometheus.Labels{
 		EIR_STATUS_LABEL: eirStatus,
 		EIR_TYPE_LABEL:   eirType,
@@ -49,5 +54,9 @@ func IncrEquipmentStatusFailCounter(eirStatus string, eirType string) {
 }
 
 func IncrEquipmentStatusSuccessCounter() {
+	if EirEquipmentStatusSuccessCounter == nil {
+		logger.MetricsLog.Errorln("EirEquipmentStatusSuccessCounter hasn't set")
+		return
+	}
 	EirEquipmentStatusSuccessCounter.Inc()
 }
