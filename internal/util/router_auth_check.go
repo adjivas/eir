@@ -5,8 +5,9 @@ import (
 
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/free5gc/openapi/models"
 	"github.com/gin-gonic/gin"
+
+	"github.com/free5gc/openapi/models"
 )
 
 type RouterAuthorizationCheck struct {

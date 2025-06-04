@@ -12,9 +12,10 @@ import (
 	processor "github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
+	"github.com/gin-gonic/gin"
+
 	"github.com/free5gc/util/httpwrapper"
 	logger_util "github.com/free5gc/util/logger"
-	"github.com/gin-gonic/gin"
 )
 
 type Server struct {

@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"github.com/adjivas/eir/pkg/app"
+
 	"github.com/free5gc/openapi/nrf/NFManagement"
 )
 

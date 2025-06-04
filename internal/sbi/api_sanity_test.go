@@ -12,15 +12,16 @@ import (
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/util"
 	"github.com/adjivas/eir/pkg/factory"
-	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
-	"github.com/free5gc/openapi/models"
-	util_logger "github.com/free5gc/util/logger"
-	"github.com/free5gc/util/mongoapi"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"
+
+	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
+	"github.com/free5gc/openapi/models"
+	util_logger "github.com/free5gc/util/logger"
+	"github.com/free5gc/util/mongoapi"
 )
 
 func setupHttpServer(t *testing.T) *gin.Engine {

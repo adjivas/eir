@@ -121,7 +121,7 @@ linters-settings:
       hugeParam:
         # Size in bytes that makes the warning trigger. Default: 80
         # This size shoulb be smaller
-        sizeThreshold: 512
+        sizeThreshold: 2048
       ifElseChain:
         # Min number of if-else blocks that makes the warning trigger.
         # Default: 2
