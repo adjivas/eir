@@ -11,13 +11,13 @@ To populate the database with EIR data, we can use these commands:
 ```shell
 % mongosh
 > use free5gc
-> db.policyData.ues.eirData.insertOne( { "pei": "imeisv-4370816125816151", "equipement_status": "WHITELISTED" })
+> db.policyData.ues.eirData.insertOne( { "pei": "imeisv-4370816125816151", "equipment_status": "WHITELISTED" })
 ```
 
 To run and test this NF, use the following commands:
 ```shell
 % go run cmd/main.go --config config/eircfg.yaml
-% http://127.0.0.8:8000/n5g-eir-eic/v1/equipement-status?pei=imeisv-4370816125816151
+% http://127.0.0.8:8000/n5g-eir-eic/v1/equipment-status?pei=imeisv-4370816125816151
 ```
 
 To run linters, use:

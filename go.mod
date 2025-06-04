@@ -2,7 +2,7 @@ module github.com/adjivas/eir
 
 go 1.21
 
-replace github.com/free5gc/openapi => github.com/adjivas/openapi v0.0.0-20250513155714-06a19ba444a8
+replace github.com/free5gc/openapi => github.com/adjivas/openapi v0.0.0-20250604095946-14a6a1318b87
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d

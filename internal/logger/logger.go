@@ -6,19 +6,19 @@ import (
 )
 
 var (
-	Log                 *logrus.Logger
-	NfLog               *logrus.Entry
-	MainLog             *logrus.Entry
-	InitLog             *logrus.Entry
-	CfgLog              *logrus.Entry
-	EquipementStatusLog *logrus.Entry
-	UtilLog             *logrus.Entry
-	HttpLog             *logrus.Entry
-	ConsumerLog         *logrus.Entry
-	GinLog              *logrus.Entry
-	ProcLog             *logrus.Entry
-	SBILog              *logrus.Entry
-	DbLog               *logrus.Entry
+	Log                *logrus.Logger
+	NfLog              *logrus.Entry
+	MainLog            *logrus.Entry
+	InitLog            *logrus.Entry
+	CfgLog             *logrus.Entry
+	EquipmentStatusLog *logrus.Entry
+	UtilLog            *logrus.Entry
+	HttpLog            *logrus.Entry
+	ConsumerLog        *logrus.Entry
+	GinLog             *logrus.Entry
+	ProcLog            *logrus.Entry
+	SBILog             *logrus.Entry
+	DbLog              *logrus.Entry
 )
 
 func init() {
@@ -34,7 +34,7 @@ func init() {
 	CfgLog = NfLog.WithField(logger_util.FieldCategory, "CFG")
 	GinLog = NfLog.WithField(logger_util.FieldCategory, "GIN")
 	ConsumerLog = NfLog.WithField(logger_util.FieldCategory, "Consumer")
-	EquipementStatusLog = NfLog.WithField(logger_util.FieldCategory, "EquipementStatus")
+	EquipmentStatusLog = NfLog.WithField(logger_util.FieldCategory, "EquipmentStatus")
 	ProcLog = NfLog.WithField(logger_util.FieldCategory, "Proc")
 	HttpLog = NfLog.WithField(logger_util.FieldCategory, "HTTP")
 	UtilLog = NfLog.WithField(logger_util.FieldCategory, "Util")

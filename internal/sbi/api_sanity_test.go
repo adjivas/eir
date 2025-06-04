@@ -29,7 +29,7 @@ func setupHttpServer(t *testing.T) *gin.Engine {
 
 func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.Engine {
 	router := util_logger.NewGinWithLogrus(logger.GinLog)
-	equipementStatusGroup := router.Group(factory.EirDrResUriPrefix)
+	equipmentStatusGroup := router.Group(factory.EirDrResUriPrefix)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -58,8 +58,8 @@ func setupHttpServerWithDefaultStatus(t *testing.T, defaultStatus string) *gin.E
 	eir.EXPECT().Processor().Return(processor).AnyTimes()
 
 	s := NewServer(eir, "")
-	equipementStatusRoutes := s.getEquipementStatusRoutes()
-	AddService(equipementStatusGroup, equipementStatusRoutes)
+	equipmentStatusRoutes := s.getEquipmentStatusRoutes()
+	AddService(equipmentStatusGroup, equipmentStatusRoutes)
 	return router
 }
 
@@ -83,7 +83,7 @@ func TestEIR_Root(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
+func TestEIR_EquipmentStatus_FoundEquipmentStatus(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -94,26 +94,26 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{"pei": "imei-42", "equipement_status": "BLACKLISTED"}
-	pei2 := bson.M{"pei": "imei-43", "equipement_status": "BLACKLISTED"}
-	pei3 := bson.M{"pei": "imei-012345678901234", "equipement_status": "WHITELISTED"}
+	pei1 := bson.M{"pei": "imei-42", "equipment_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-43", "equipment_status": "BLACKLISTED"}
+	pei3 := bson.M{"pei": "imei-012345678901234", "equipment_status": "WHITELISTED"}
 	filters := []bson.M{filter, filter, filter}
 	peis := []map[string]interface{}{pei1, pei2, pei3}
 	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 		Status: "WHITELISTED",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_api_service.EIREquipementStatusGetResponse{}
+	t.Run("EquipmentStatus", func(t *testing.T) {
+		json_message := eir_api_service.EIREquipmentStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -125,7 +125,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
+func TestEIR_EquipmentStatus_FoundEquipmentStatus_WithSUPI(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -136,26 +136,26 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930000000001", "equipement_status": "BLACKLISTED"}
-	pei2 := bson.M{"pei": "imei-43", "supi": "imsi-208930123456789", "equipement_status": "BLACKLISTED"}
-	pei3 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930123456789", "equipement_status": "WHITELISTED"}
+	pei1 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930000000001", "equipment_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-43", "supi": "imsi-208930123456789", "equipment_status": "BLACKLISTED"}
+	pei3 := bson.M{"pei": "imei-012345678901234", "supi": "imsi-208930123456789", "equipment_status": "WHITELISTED"}
 	filters := []bson.M{filter, filter, filter}
 	peis := []map[string]interface{}{pei1, pei2, pei3}
 	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&supi=imsi-208930123456789"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=imei-012345678901234&supi=imsi-208930123456789"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 		Status: "WHITELISTED",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_api_service.EIREquipementStatusGetResponse{}
+	t.Run("EquipmentStatus", func(t *testing.T) {
+		json_message := eir_api_service.EIREquipmentStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -167,7 +167,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
+func TestEIR_EquipmentStatus_FoundEquipmentStatus_WithGPSI(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -178,26 +178,26 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	}()
 
 	filter := bson.M{"pei": nil}
-	pei1 := bson.M{"pei": "imei-42", "gpsi": "msisdn-00042", "equipement_status": "BLACKLISTED"}
-	pei2 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-00000", "equipement_status": "BLACKLISTED"}
-	pei3 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-12345", "equipement_status": "WHITELISTED"}
+	pei1 := bson.M{"pei": "imei-42", "gpsi": "msisdn-00042", "equipment_status": "BLACKLISTED"}
+	pei2 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-00000", "equipment_status": "BLACKLISTED"}
+	pei3 := bson.M{"pei": "imei-012345678901234", "gpsi": "msisdn-12345", "equipment_status": "WHITELISTED"}
 	filters := []bson.M{filter, filter, filter}
 	peis := []map[string]interface{}{pei1, pei2, pei3}
 	err := mongoapi.RestfulAPIPutMany("policyData.ues.eirData", filters, peis)
 	assert.Nil(t, err)
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234&gpsi=msisdn-12345"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=imei-012345678901234&gpsi=msisdn-12345"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 		Status: "WHITELISTED",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_api_service.EIREquipementStatusGetResponse{}
+	t.Run("EquipmentStatus", func(t *testing.T) {
+		json_message := eir_api_service.EIREquipmentStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -209,7 +209,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithGPSI(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) {
+func TestEIR_EquipmentStatus_FoundEquipmentStatus_WithSUPI_GPSI(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -222,15 +222,15 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	filter := bson.M{"pei": nil}
 	pei1 := bson.M{
 		"pei": "imei-42", "supi": "imsi-208930000000042", "gpsi": "msisdn-00042",
-		"equipement_status": "BLACKLISTED",
+		"equipment_status": "BLACKLISTED",
 	}
 	pei2 := bson.M{
 		"pei": "imei-012345678901234", "supi": "imsi-012345678901234", "gpsi": "msisdn-12345",
-		"equipement_status": "WHITELISTED",
+		"equipment_status": "WHITELISTED",
 	}
 	pei3 := bson.M{
 		"pei": "imei-43", "supi": "imsi-208930000000043", "gpsi": "msisdn-00043",
-		"equipement_status": "BLACKLISTED",
+		"equipment_status": "BLACKLISTED",
 	}
 	filters := []bson.M{filter, filter, filter}
 	peis := []map[string]interface{}{pei1, pei2, pei3}
@@ -238,18 +238,18 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	assert.Nil(t, err)
 
 	reqUri := factory.EirDrResUriPrefix +
-		"/equipement-status?pei=imei-012345678901234&supi=imsi-012345678901234&gpsi=msisdn-12345"
+		"/equipment-status?pei=imei-012345678901234&supi=imsi-012345678901234&gpsi=msisdn-12345"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 		Status: "WHITELISTED",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_api_service.EIREquipementStatusGetResponse{}
+	t.Run("EquipmentStatus", func(t *testing.T) {
+		json_message := eir_api_service.EIREquipmentStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -261,7 +261,7 @@ func TestEIR_EquipementStatus_FoundEquipementStatus_WithSUPI_GPSI(t *testing.T) 
 	})
 }
 
-func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
+func TestEIR_EquipmentStatus_NotFoundEquipmentStatus(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -271,7 +271,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 		}
 	}()
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
@@ -284,7 +284,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 		Detail: "The Equipment Status wasn't found",
 		Cause:  "ERROR_EQUIPMENT_UNKNOWN",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
+	t.Run("EquipmentStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
@@ -297,7 +297,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
+func TestEIR_EquipmentStatus_MissingPEI(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -307,7 +307,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 		}
 	}()
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
@@ -324,7 +324,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 			Reason: "The PEI is missing",
 		}},
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
+	t.Run("EquipmentStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
@@ -337,7 +337,7 @@ func TestEIR_EquipementStatus_MissingPEI(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusBlack(t *testing.T) {
+func TestEIR_EquipmentStatus_NotFoundEquipmentStatus_WithDefaultStatusBlack(t *testing.T) {
 	server := setupHttpServerWithDefaultStatus(t, "BLACKLISTED")
 	setupMongoDB(t)
 
@@ -347,18 +347,18 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusBlack(t 
 		}
 	}()
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 		Status: "BLACKLISTED",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_api_service.EIREquipementStatusGetResponse{}
+	t.Run("EquipmentStatus", func(t *testing.T) {
+		json_message := eir_api_service.EIREquipmentStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -370,7 +370,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusBlack(t 
 	})
 }
 
-func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusWhite(t *testing.T) {
+func TestEIR_EquipmentStatus_NotFoundEquipmentStatus_WithDefaultStatusWhite(t *testing.T) {
 	server := setupHttpServerWithDefaultStatus(t, "WHITELISTED")
 	setupMongoDB(t)
 
@@ -380,18 +380,18 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusWhite(t 
 		}
 	}()
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=imei-012345678901234"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=imei-012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
 	rsp := httptest.NewRecorder()
 	server.ServeHTTP(rsp, req)
 
-	expected_message := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+	expected_message := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 		Status: "WHITELISTED",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
-		json_message := eir_api_service.EIREquipementStatusGetResponse{}
+	t.Run("EquipmentStatus", func(t *testing.T) {
+		json_message := eir_api_service.EIREquipmentStatusGetResponse{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
 		assert.Nil(t, err)
@@ -403,7 +403,7 @@ func TestEIR_EquipementStatus_NotFoundEquipementStatus_WithDefaultStatusWhite(t 
 	})
 }
 
-func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
+func TestEIR_EquipmentStatus_URITooLong(t *testing.T) {
 	server := setupHttpServer(t)
 	setupMongoDB(t)
 
@@ -414,7 +414,7 @@ func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
 	}()
 
 	imei := "imei-" + strings.Repeat("0", 4096)
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=" + imei
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=" + imei
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
@@ -427,7 +427,7 @@ func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
 		Detail: "URI Too Long",
 		Cause:  "INCORRECT_URI_LENGTH",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
+	t.Run("EquipmentStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)
@@ -440,14 +440,14 @@ func TestEIR_EquipementStatus_URITooLong(t *testing.T) {
 	})
 }
 
-func TestEIR_EquipementStatus_WithoutDatabase(t *testing.T) {
+func TestEIR_EquipmentStatus_WithoutDatabase(t *testing.T) {
 	server := setupHttpServer(t)
 	err := mongoapi.Client.Disconnect(context.Background()) // The reason of the error
 	if err != nil {
 		logger.UtilLog.Errorf("Failed to properly disconnect from the database")
 	}
 
-	reqUri := factory.EirDrResUriPrefix + "/equipement-status?pei=012345678901234"
+	reqUri := factory.EirDrResUriPrefix + "/equipment-status?pei=012345678901234"
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, reqUri, nil)
 	require.Nil(t, err)
@@ -460,7 +460,7 @@ func TestEIR_EquipementStatus_WithoutDatabase(t *testing.T) {
 		Detail: "RestfulAPIGetOne err: client is disconnected",
 		Cause:  "INSUFFICIENT_RESOURCES",
 	})
-	t.Run("EquipementStatus", func(t *testing.T) {
+	t.Run("EquipmentStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
 
 		err := json.Unmarshal(rsp.Body.Bytes(), &json_message)

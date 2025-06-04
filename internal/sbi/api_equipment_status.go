@@ -10,7 +10,7 @@ import (
 
 const maxURILength = 1024
 
-func (s *Server) getEquipementStatusRoutes() []Route {
+func (s *Server) getEquipmentStatusRoutes() []Route {
 	return []Route{
 		{
 			"Index",
@@ -19,10 +19,10 @@ func (s *Server) getEquipementStatusRoutes() []Route {
 			Index,
 		},
 		{
-			"EquipementStatus",
+			"EquipmentStatus",
 			"GET",
-			"/equipement-status",
-			s.HandleQueryEirEquipementStatus,
+			"/equipment-status",
+			s.HandleQueryEirEquipmentStatus,
 		},
 	}
 }
@@ -50,8 +50,8 @@ func Index(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "Hello World!")
 }
 
-func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
-	logger.EquipementStatusLog.Tracef("Handle EirEquipementStatus")
+func (s *Server) HandleQueryEirEquipmentStatus(c *gin.Context) {
+	logger.EquipmentStatusLog.Tracef("Handle EirEquipmentStatus")
 
 	collName := "policyData.ues.eirData"
 	pei := c.Query("pei")
@@ -71,6 +71,6 @@ func (s *Server) HandleQueryEirEquipementStatus(c *gin.Context) {
 		logger.HttpLog.Errorf("The PEI is missing")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
-		s.Processor().GetEirEquipementStatusProcedure(c, collName, pei, supi, gpsi)
+		s.Processor().GetEirEquipmentStatusProcedure(c, collName, pei, supi, gpsi)
 	}
 }

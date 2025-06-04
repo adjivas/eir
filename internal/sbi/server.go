@@ -99,8 +99,8 @@ func newRouter(s *Server) *gin.Engine {
 	router := logger_util.NewGinWithLogrus(logger.GinLog)
 
 	eirHttpCallBackGroup := router.Group(factory.EirDrResUriPrefix)
-	equipementStatusRoutes := s.getEquipementStatusRoutes()
-	AddService(eirHttpCallBackGroup, equipementStatusRoutes)
+	equipmentStatusRoutes := s.getEquipmentStatusRoutes()
+	AddService(eirHttpCallBackGroup, equipmentStatusRoutes)
 
 	return router
 }

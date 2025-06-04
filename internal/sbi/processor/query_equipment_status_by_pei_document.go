@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName string,
+func (p *Processor) GetEirEquipmentStatusProcedure(c *gin.Context, collName string,
 	pei string, supi string, gpsi string,
 ) {
 	filter := map[string]interface{}{
@@ -25,8 +25,8 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 
 	data, err_database := p.GetDataFromDB(collName, filter)
 	if err_database == nil {
-		response := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
-			Status: data["equipement_status"].(string),
+		response := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
+			Status: data["equipment_status"].(string),
 		})
 		c.JSON(http.StatusOK, response)
 	} else {
@@ -34,7 +34,7 @@ func (p *Processor) GetEirEquipementStatusProcedure(c *gin.Context, collName str
 		case "DATA_NOT_FOUND":
 			if defaultStatus := p.Config().Configuration.DefaultStatus; defaultStatus != "" {
 				logger.ProcLog.Warnf("The Equipment Status wasn't found, the default %s is returned", defaultStatus)
-				response := util.ToBsonM(eir_api_service.EIREquipementStatusGetResponse{
+				response := util.ToBsonM(eir_api_service.EIREquipmentStatusGetResponse{
 					Status: defaultStatus,
 				})
 				c.JSON(http.StatusOK, response)
