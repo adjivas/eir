@@ -458,7 +458,7 @@ func TestEIR_EquipmentStatus_WithoutDatabase(t *testing.T) {
 		Title:  "The equipment identify checking has failed",
 		Status: http.StatusInternalServerError,
 		Detail: "RestfulAPIGetOne err: client is disconnected",
-		Cause:  "INSUFFICIENT_RESOURCES",
+		Cause:  "SYSTEM_FAILURE",
 	})
 	t.Run("EquipmentStatus", func(t *testing.T) {
 		json_message := models.ProblemDetails{}
