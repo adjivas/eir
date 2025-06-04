@@ -14,6 +14,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	DELAY_REGISTRATION_NRF = 2 * time.Second
+)
+
 type NrfService struct {
 	nfMngmntMu sync.RWMutex
 
@@ -94,7 +98,7 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 		res, err = client.NFInstanceIDDocumentApi.RegisterNFInstance(ctx, registerNfInstanceRequest)
 		if err != nil || res == nil {
 			logger.ConsumerLog.Errorf("EIR register to NRF Error[%s]", err.Error())
-			time.Sleep(2 * time.Second)
+			time.Sleep(DELAY_REGISTRATION_NRF)
 			continue
 		}
 
