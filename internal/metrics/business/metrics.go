@@ -44,7 +44,7 @@ func GetEquipmentStatusMetrics(namespace string) []prometheus.Collector {
 
 func IncrEquipmentStatusFailCounter(eirStatus string, eirType string) {
 	if EirEquipmentStatusFailCounter == nil {
-		logger.MetricsLog.Errorln("EirEquipmentStatusFailCounter hasn't set")
+		logger.MetricsLog.Errorln("EirEquipmentStatusFailCounter hasn't been set")
 		return
 	}
 	EirEquipmentStatusFailCounter.With(prometheus.Labels{
@@ -55,7 +55,7 @@ func IncrEquipmentStatusFailCounter(eirStatus string, eirType string) {
 
 func IncrEquipmentStatusSuccessCounter() {
 	if EirEquipmentStatusSuccessCounter == nil {
-		logger.MetricsLog.Errorln("EirEquipmentStatusSuccessCounter hasn't set")
+		logger.MetricsLog.Errorln("EirEquipmentStatusSuccessCounter hasn't been set")
 		return
 	}
 	EirEquipmentStatusSuccessCounter.Inc()
