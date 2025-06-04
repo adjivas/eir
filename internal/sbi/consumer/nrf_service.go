@@ -102,7 +102,7 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 			continue
 		}
 
-		if res.Location != "" {
+		if res.Location == "" {
 			// NFUpdate
 			break
 		}
