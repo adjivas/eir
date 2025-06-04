@@ -40,7 +40,6 @@ type EIRContext struct {
 	SBIPort         int
 	DefaultStatus   string
 	NfService       map[models.ServiceName]models.NrfNfManagementNfService
-	HttpIPv6Address string
 	NfId            string
 	NrfUri          string
 	NrfCertPem      string
