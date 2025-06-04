@@ -8,6 +8,7 @@ import (
 
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
+	sbiMetrics "github.com/adjivas/eir/internal/metrics/sbi"
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/nrf/NFManagement"
@@ -37,6 +38,8 @@ func (ns *NrfService) getNFManagementClient(uri string) *NFManagement.APIClient 
 
 	configuration := NFManagement.NewConfiguration()
 	configuration.SetBasePath(uri)
+
+	configuration.SetMetrics(sbiMetrics.SbiMetricHook)
 	client = NFManagement.NewAPIClient(configuration)
 
 	ns.nfMngmntMu.RUnlock()

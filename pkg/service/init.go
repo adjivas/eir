@@ -10,6 +10,7 @@ import (
 
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
+	"github.com/adjivas/eir/internal/metrics"
 	"github.com/adjivas/eir/internal/sbi"
 	"github.com/adjivas/eir/internal/sbi/consumer"
 	"github.com/adjivas/eir/internal/sbi/processor"
@@ -27,11 +28,12 @@ type EirApp struct {
 
 	ctx    context.Context
 	cancel context.CancelFunc
+	wg     sync.WaitGroup
 
-	wg        sync.WaitGroup
-	sbiServer *sbi.Server
-	processor *processor.Processor
-	consumer  *consumer.Consumer
+	processor     *processor.Processor
+	consumer      *consumer.Consumer
+	sbiServer     *sbi.Server
+	metricsServer *metrics.Server
 }
 
 var _ app.App = &EirApp{}
@@ -57,6 +59,11 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 	eir.consumer = consumer
 
 	eir.sbiServer = sbi.NewServer(eir, tlsKeyLogPath)
+
+	var err error
+	if eir.metricsServer, err = metrics.NewServer(cfg, tlsKeyLogPath); err != nil {
+		return nil, err
+	}
 
 	return eir, nil
 }
@@ -176,10 +183,14 @@ func (a *EirApp) Start() {
 		}
 	}()
 
-	logger.InitLog.Infoln("Server started")
+	logger.InitLog.Infoln("Servers started")
 
 	a.wg.Add(1)
 	go a.listenShutdown(a.ctx)
+
+	go func() {
+		a.metricsServer.Run(a.cfg, &a.wg)
+	}()
 
 	a.sbiServer.Run(&a.wg)
 	a.WaitRoutineStopped()
@@ -205,6 +216,9 @@ func (a *EirApp) terminateProcedure() {
 func (a *EirApp) CallServerStop() {
 	if a.sbiServer != nil {
 		a.sbiServer.Shutdown()
+	}
+	if a.metricsServer != nil {
+		a.metricsServer.Stop()
 	}
 }
 
