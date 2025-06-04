@@ -15,10 +15,11 @@ import (
 	"github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
+	"github.com/sirupsen/logrus"
+
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/nrf/NFManagement"
 	"github.com/free5gc/util/mongoapi"
-	"github.com/sirupsen/logrus"
 )
 
 type EirApp struct {

@@ -8,10 +8,11 @@ import (
 
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
+	"github.com/pkg/errors"
+
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/openapi/nrf/NFDiscovery"
 	"github.com/free5gc/openapi/nrf/NFManagement"
-	"github.com/pkg/errors"
 )
 
 const (

@@ -11,9 +11,10 @@ import (
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/adjivas/eir/pkg/service"
+	"github.com/urfave/cli"
+
 	logger_util "github.com/free5gc/util/logger"
 	"github.com/free5gc/util/version"
-	"github.com/urfave/cli"
 )
 
 const (

@@ -5,9 +5,10 @@ import (
 
 	"github.com/adjivas/eir/internal/logger"
 	"github.com/adjivas/eir/internal/util"
+	"github.com/gin-gonic/gin"
+
 	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
 	"github.com/free5gc/openapi/models"
-	"github.com/gin-gonic/gin"
 )
 
 func (p *Processor) GetEirEquipmentStatusProcedure(c *gin.Context, collName string,
