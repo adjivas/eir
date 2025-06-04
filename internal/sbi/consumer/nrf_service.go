@@ -98,29 +98,28 @@ func (ns *NrfService) SendRegisterNFInstance(ctx context.Context, nrfUri string)
 			continue
 		}
 
-		if res.Location == "" {
+		if res.Location != "" {
 			// NFUpdate
 			break
-		} else {
-			resourceUri := res.Location
-			resourceNrfUri, _, _ = strings.Cut(resourceUri, "/nnrf-nfm/")
-			retrieveNfInstanceId = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
-
-			oauth2 := false
-
-			if res.NrfNfManagementNfProfile.CustomInfo != nil {
-				v, ok := res.NrfNfManagementNfProfile.CustomInfo["oauth2"].(bool)
-				if ok {
-					oauth2 = v
-					logger.MainLog.Infoln("OAuth2 setting receive from NRF:", oauth2)
-				}
-			}
-			eir_context.GetSelf().OAuth2Required = oauth2
-			if oauth2 && eir_context.GetSelf().NrfCertPem == "" {
-				logger.CfgLog.Error("OAuth2 enable but no nrfCertPem provided in config.")
-			}
-			break
 		}
+		resourceUri := res.Location
+		resourceNrfUri, _, _ = strings.Cut(resourceUri, "/nnrf-nfm/")
+		retrieveNfInstanceId = resourceUri[strings.LastIndex(resourceUri, "/")+1:]
+
+		oauth2 := false
+
+		if res.NrfNfManagementNfProfile.CustomInfo != nil {
+			if v, ok := res.NrfNfManagementNfProfile.CustomInfo["oauth2"].(bool); ok == true {
+				oauth2 = v
+				logger.MainLog.Infoln("OAuth2 setting receive from NRF:", oauth2)
+			}
+		}
+
+		eir_context.GetSelf().OAuth2Required = oauth2
+		if oauth2 && eir_context.GetSelf().NrfCertPem == "" {
+			logger.CfgLog.Error("OAuth2 enable but no nrfCertPem provided in config.")
+		}
+		break
 	}
 	return resourceNrfUri, retrieveNfInstanceId, err
 }

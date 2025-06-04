@@ -9,6 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
     strategy:
       matrix:
         go: ['1.21']
@@ -20,8 +30,21 @@ jobs:
       with:
         go-version: ${{ matrix.go }}
 
+    - name: Wait for MongoDB to be healthy
+      run: |
+        echo "Waiting for MongoDB to be ready..."
+        for i in {1..30}; do
+          if mongosh --eval "db.adminCommand('ping')" localhost:27017; then
+            echo "MongoDB is up!"
+            break
+          fi
+          sleep 1
+        done
+
     - name: Build
       run: go build -v ./...
 
     - name: Test
+      env:
+        MONGODB_URI: mongodb://localhost:27017
       run: go test -v -short ./...

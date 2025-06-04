@@ -13,7 +13,7 @@ run:
   # include test files or not, default is true
   tests: true
   # list of build tags, all linters use it. Default is empty list.
-  build-tags:
+  build-tags: []
   # which dirs to skip: issues from them won't be reported;
   # can use regexp here: generated.*, regexp is applied on full path;
   # default value is empty list, but default dirs are skipped independently
@@ -46,15 +46,15 @@ run:
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
-  format:
-    - format: colored-line-number
-      path: stdout
   # print lines of code with issue, default is true
   print-issued-lines: true
   # print linter name in the end of issue text, default is true
   print-linter-name: true
   # make issues output unique by line, default is true
   uniq-by-line: true
+formats:
+  - format: colored-line-number
+    path: stdout
 # all available settings of specific linters
 linters-settings:
   errcheck:
@@ -131,10 +131,13 @@ linters-settings:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0.8
   gomnd:
-    settings:
-      mnd:
-        # the list of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
-        checks: argument,case,condition,operation,return,assign
+    checks:
+      - argument
+      - case
+      - condition
+      - operation
+      - return
+      - assign
   gomodguard:
     allowed:
       modules:                                                        # List of allowed modules
@@ -234,23 +237,20 @@ linters-settings:
 
 linters:
   enable:
-    - govet
+    # - govet # error in importing "github.com/free5gc/util/logger"
     - errcheck
-    - staticcheck
+    # - staticcheck # error in importing "internal/goarch
     - unused
-    # - structcheck
-    # - varcheck
     - ineffassign
-    # - deadcode
     # Additional
     - lll
     - godox
-    # - gomnd
-    # - goconst
+    - gomnd
+    - goconst
     # - gocognit
     # - maligned
-    # - nestif
-    # - gomodguard
+    - nestif
+    - gomodguard
     - nakedret
     # - golint
     - misspell
