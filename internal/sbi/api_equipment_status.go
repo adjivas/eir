@@ -71,6 +71,6 @@ func (s *Server) HandleQueryEirEquipmentStatus(c *gin.Context) {
 		logger.HttpLog.Errorf("The PEI is missing")
 		c.JSON(http.StatusNotFound, problemDetail)
 	} else {
-		s.Processor().GetEirEquipmentStatusProcedure(c, collName, pei, supi, gpsi)
+		s.eir.Processor().GetEirEquipmentStatusProcedure(c, collName, pei, supi, gpsi)
 	}
 }

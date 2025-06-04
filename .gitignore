@@ -27,3 +27,5 @@ cscope.*
 # Debug
 *.log
 *.pcap
+cert/
+main

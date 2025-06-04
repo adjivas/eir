@@ -16,6 +16,10 @@ import (
 	"github.com/urfave/cli"
 )
 
+const (
+	KEY_FILE_MODE = 0o775
+)
+
 var EIR *service.EirApp
 
 func main() {
@@ -90,7 +94,7 @@ func initLogFile(logNfPath []string) (string, error) {
 
 		nfDir, _ := filepath.Split(path)
 		tmpDir := filepath.Join(nfDir, "key")
-		if err := os.MkdirAll(tmpDir, 0o775); err != nil {
+		if err := os.MkdirAll(tmpDir, KEY_FILE_MODE); err != nil {
 			logger.InitLog.Errorf("Make directory %s failed: %+v", tmpDir, err)
 			return "", err
 		}

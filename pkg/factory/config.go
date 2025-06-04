@@ -30,7 +30,7 @@ type Config struct {
 	Info          *Info          `yaml:"info" valid:"required"`
 	Configuration *Configuration `yaml:"configuration" valid:"required"`
 	Logger        *Logger        `yaml:"logger" valid:"required"`
-	sync.RWMutex
+	mu            sync.RWMutex
 }
 
 func (c *Config) Validate() (bool, error) {
@@ -152,8 +152,8 @@ func appendInvalid(err error) error {
 }
 
 func (c *Config) GetVersion() string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	if c.Info.Version != "" {
 		return c.Info.Version
@@ -162,8 +162,8 @@ func (c *Config) GetVersion() string {
 }
 
 func (c *Config) SetLogEnable(enable bool) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
@@ -177,8 +177,8 @@ func (c *Config) SetLogEnable(enable bool) {
 }
 
 func (c *Config) SetLogLevel(level string) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
@@ -191,8 +191,8 @@ func (c *Config) SetLogLevel(level string) {
 }
 
 func (c *Config) SetLogReportCaller(reportCaller bool) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
@@ -206,8 +206,8 @@ func (c *Config) SetLogReportCaller(reportCaller bool) {
 }
 
 func (c *Config) GetLogEnable() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
 		return false
@@ -216,8 +216,8 @@ func (c *Config) GetLogEnable() bool {
 }
 
 func (c *Config) GetLogLevel() string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
 		return "info"
@@ -226,8 +226,8 @@ func (c *Config) GetLogLevel() string {
 }
 
 func (c *Config) GetLogReportCaller() bool {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.Logger == nil {
 		logger.CfgLog.Warnf("Logger should not be nil")
 		return false
@@ -236,13 +236,13 @@ func (c *Config) GetLogReportCaller() bool {
 }
 
 func (c *Config) GetCertPemPath() string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.Configuration.Sbi.Tls.Pem
 }
 
 func (c *Config) GetCertKeyPath() string {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.Configuration.Sbi.Tls.Key
 }
