@@ -6,6 +6,8 @@ package factory
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"sync"
 
 	"github.com/adjivas/eir/internal/logger"
@@ -13,15 +15,18 @@ import (
 )
 
 const (
-	EirDefaultTLSKeyLogPath  = "./log/eirsslkey.log"
-	EirDefaultCertPemPath    = "./cert/eir.pem"
-	EirDefaultPrivateKeyPath = "./cert/eir.key"
-	EirDefaultConfigPath     = "./config/eircfg.yaml"
-	EirSbiDefaultIP          = "127.0.0.7"
-	EirSbiDefaultPort        = 8000
-	EirSbiDefaultScheme      = "https"
-	EirDefaultNrfUri         = "https://127.0.0.10:8000"
-	EirDrResUriPrefix        = "/n5g-eir-eic/v1"
+	EirDefaultTLSKeyLogPath    = "./log/eirsslkey.log"
+	EirDefaultCertPemPath      = "./cert/eir.pem"
+	EirDefaultPrivateKeyPath   = "./cert/eir.key"
+	EirDefaultConfigPath       = "./config/eircfg.yaml"
+	EirSbiDefaultIP            = "127.0.0.7"
+	EirSbiDefaultPort          = 8000
+	EirSbiDefaultScheme        = "https"
+	EirDefaultNrfUri           = "https://127.0.0.10:8000"
+	EirDrResUriPrefix          = "/n5g-eir-eic/v1"
+	EirMetricsDefaultPort      = 9091
+	EirMetricsDefaultScheme    = "https"
+	EirMetricsDefaultNamespace = "free5gc"
 )
 
 type DbType string
@@ -63,6 +68,7 @@ const (
 
 type Configuration struct {
 	Sbi             *Sbi     `yaml:"sbi" valid:"required"`
+	Metrics         *Metrics `yaml:"metrics,omitempty" valid:"optional"`
 	DefaultStatus   string   `yaml:"defaultStatus" valid:"in(WHITELISTED|BLACKLISTED),optional"`
 	DbConnectorType DbType   `yaml:"dbConnectorType" valid:"required,in(mongodb)"`
 	Mongodb         *Mongodb `yaml:"mongodb" valid:"optional"`
@@ -75,8 +81,50 @@ func (c *Configuration) validate() (bool, error) {
 		return sbi.validate()
 	}
 
+	if c.Metrics != nil {
+		if _, err := c.Metrics.validate(); err != nil {
+			return false, err
+		}
+		if c.Sbi != nil && c.Metrics.Port == c.Sbi.Port && c.Sbi.BindingIP == c.Metrics.BindingIPv4 {
+			var errs govalidator.Errors
+			err := fmt.Errorf("sbi and metrics bindings IP: %s and port: %d cannot be the same, please provide at least another port for the metrics", c.Sbi.BindingIP, c.Sbi.Port)
+			errs = append(errs, err)
+			return false, error(errs)
+		}
+	}
+
 	result, err := govalidator.ValidateStruct(c)
 	return result, appendInvalid(err)
+}
+
+type Metrics struct {
+	Scheme      string `yaml:"scheme" valid:"in(http|https)"`
+	BindingIPv4 string `yaml:"bindingIPv4,omitempty" valid:"required,host"` // IP used to run the server in the node.
+	Port        int    `yaml:"port,omitempty" valid:"required,port"`
+	Tls         *Tls   `yaml:"tls,omitempty" valid:"optional"`
+	Namespace   string `yaml:"namespace" valid:"optional"`
+}
+
+// This function is the mirror of the SBI one, I decided not to factor the code as it could in the future diverge.
+// And it will reduce the cognitive overload when reading the function by not hiding the logic elsewhere.
+func (m *Metrics) validate() (bool, error) {
+	var errs govalidator.Errors
+
+	if tls := m.Tls; tls != nil {
+		if _, err := tls.validate(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if _, err := govalidator.ValidateStruct(m); err != nil {
+		errs = append(errs, err)
+	}
+
+	if len(errs) > 0 {
+		return false, error(errs)
+	}
+
+	return true, nil
 }
 
 type Sbi struct {
@@ -245,4 +293,68 @@ func (c *Config) GetCertKeyPath() string {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.Configuration.Sbi.Tls.Key
+}
+
+func (c *Config) GetMetricsScheme() string {
+	if c.Configuration != nil && c.Configuration.Metrics != nil && c.Configuration.Metrics.Scheme != "" {
+		return c.Configuration.Metrics.Scheme
+	}
+	return EirMetricsDefaultScheme
+}
+
+func (c *Config) GetMetricsPort() int {
+	if c.Configuration != nil && c.Configuration.Metrics != nil && c.Configuration.Metrics.Port != 0 {
+		return c.Configuration.Metrics.Port
+	}
+	return EirMetricsDefaultPort
+}
+
+func (c *Config) GetMetricsBindingIP() string {
+	bindIP := "0.0.0.0"
+	if c.Configuration == nil || c.Configuration.Metrics == nil {
+		return bindIP
+	}
+
+	if c.Configuration.Metrics.BindingIPv4 != "" {
+		if bindIP = os.Getenv(c.Configuration.Metrics.BindingIPv4); bindIP != "" {
+			logger.CfgLog.Infof("Parsing ServerIP [%s] from ENV Variable", bindIP)
+		} else {
+			bindIP = c.Configuration.Metrics.BindingIPv4
+		}
+	}
+	return bindIP
+}
+
+func (c *Config) GetMetricsBindingAddr() string {
+	return c.GetMetricsBindingIP() + ":" + strconv.Itoa(c.GetMetricsPort())
+}
+
+// We can see if there is a benefit to factor this tls key/pem with the sbi ones
+func (c *Config) GetMetricsCertPemPath() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.Configuration.Metrics != nil && c.Configuration.Metrics.Tls != nil {
+		return c.Configuration.Metrics.Tls.Pem
+	}
+
+	return ""
+}
+
+func (c *Config) GetMetricsCertKeyPath() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.Configuration.Metrics != nil && c.Configuration.Metrics.Tls != nil {
+		return c.Configuration.Metrics.Tls.Key
+	}
+
+	return ""
+}
+
+func (c *Config) GetMetricsNamespace() string {
+	if c.Configuration.Metrics != nil && c.Configuration.Metrics.Namespace != "" {
+		return c.Configuration.Metrics.Namespace
+	}
+	return EirMetricsDefaultNamespace
 }
