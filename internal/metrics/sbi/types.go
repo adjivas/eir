@@ -41,12 +41,11 @@ const (
 
 // Labels names for the inbound sbi metrics
 const (
-	IN_STATUS_CODE_LABEL   = "status_code"
-	IN_METHOD_LABEL        = "method"
-	IN_REQUESTED_URL_LABEL = "requested_url"
-	IN_CAUSE_LABEL         = "cause"
-	IN_PATH_LABEL          = "path"
-	IN_PB_DETAILS_CTX_STR  = "problem"
+	IN_STATUS_CODE_LABEL  = "status_code"
+	IN_METHOD_LABEL       = "method"
+	IN_CAUSE_LABEL        = "cause"
+	IN_PATH_LABEL         = "path"
+	IN_PB_DETAILS_CTX_STR = "problem"
 )
 
 type OutboundMetricBasicInfo struct {
