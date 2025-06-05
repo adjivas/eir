@@ -1,8 +1,8 @@
 package business
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/adjivas/eir/internal/logger"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/adjivas/eir/internal/logger"
-	processor "github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/internal/sbi/middleware"
+	processor "github.com/adjivas/eir/internal/sbi/processor"
 	"github.com/adjivas/eir/pkg/app"
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/util/httpwrapper"

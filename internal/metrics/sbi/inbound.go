@@ -35,7 +35,7 @@ func GetSbiInboundMetrics(namespace string) []prometheus.Collector {
 				0.0500,
 			},
 		},
-		[]string{IN_METHOD_LABEL, IN_REQUESTED_URL_LABEL, IN_STATUS_CODE_LABEL},
+		[]string{IN_METHOD_LABEL, IN_PATH_LABEL, IN_STATUS_CODE_LABEL},
 	)
 
 	metrics = append(metrics, InboundRequestDuration)
@@ -54,8 +54,8 @@ func IncrInboundReqCounter(method string, path string, statusCode int, cause str
 
 func IncrInboundReqDurationCounter(method string, path string, statusCode int, duration float64) {
 	InboundRequestDuration.With(prometheus.Labels{
-		IN_REQUESTED_URL_LABEL: path,
-		IN_METHOD_LABEL:        method,
-		IN_STATUS_CODE_LABEL:   utils.FormatStatus(statusCode),
+		IN_PATH_LABEL:        path,
+		IN_METHOD_LABEL:      method,
+		IN_STATUS_CODE_LABEL: utils.FormatStatus(statusCode),
 	}).Observe(duration)
 }
