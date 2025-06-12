@@ -3,6 +3,8 @@ package business
 // Global metric information
 const (
 	SUBSYSTEM_NAME = "business"
+
+	EQUIPEMENT_STATUS_METRICS = "eir"
 )
 
 // Collectors information
@@ -32,3 +34,13 @@ const (
 	DB_SYSTEM_FAILURE = "system failure"
 	DB_UNSPECIFIED    = "unspecified"
 )
+
+var equipmentStatusMetricsEnabled bool
+
+func IsEquipmentStatusMetricsEnabled() bool {
+	return equipmentStatusMetricsEnabled
+}
+
+func EnableEquipmentStatusMetrics() {
+	equipmentStatusMetricsEnabled = true
+}

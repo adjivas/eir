@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/adjivas/eir/internal/logger"
-	"github.com/adjivas/eir/internal/metrics/sbi"
 	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/util/metrics/sbi"
 	"github.com/gin-gonic/gin"
 )
 

@@ -5,10 +5,10 @@ import (
 
 	"github.com/adjivas/eir/internal/logger"
 	business_metrics "github.com/adjivas/eir/internal/metrics/business"
-	"github.com/adjivas/eir/internal/metrics/sbi"
 	"github.com/adjivas/eir/internal/util"
 	eir_api_service "github.com/free5gc/openapi/eir/EIRService"
 	"github.com/free5gc/openapi/models"
+	"github.com/free5gc/util/metrics/sbi"
 	"github.com/gin-gonic/gin"
 )
 

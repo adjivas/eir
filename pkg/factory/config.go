@@ -24,6 +24,7 @@ const (
 	EirSbiDefaultScheme        = "https"
 	EirDefaultNrfUri           = "https://127.0.0.10:8000"
 	EirDrResUriPrefix          = "/n5g-eir-eic/v1"
+	EirMetricsDefaultEnabled   = false
 	EirMetricsDefaultPort      = 9091
 	EirMetricsDefaultScheme    = "https"
 	EirMetricsDefaultNamespace = "free5gc"
@@ -98,6 +99,7 @@ func (c *Configuration) validate() (bool, error) {
 }
 
 type Metrics struct {
+	Enable      bool   `yaml:"enable" valid:"optional"`
 	Scheme      string `yaml:"scheme" valid:"in(http|https)"`
 	BindingIPv4 string `yaml:"bindingIPv4,omitempty" valid:"required,host"` // IP used to run the server in the node.
 	Port        int    `yaml:"port,omitempty" valid:"required,port"`
@@ -295,7 +297,18 @@ func (c *Config) GetCertKeyPath() string {
 	return c.Configuration.Sbi.Tls.Key
 }
 
+func (c *Config) AreMetricsEnabled() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.Configuration != nil && c.Configuration.Metrics != nil {
+		return c.Configuration.Metrics.Enable
+	}
+	return EirMetricsDefaultEnabled
+}
+
 func (c *Config) GetMetricsScheme() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.Configuration != nil && c.Configuration.Metrics != nil && c.Configuration.Metrics.Scheme != "" {
 		return c.Configuration.Metrics.Scheme
 	}
@@ -303,6 +316,8 @@ func (c *Config) GetMetricsScheme() string {
 }
 
 func (c *Config) GetMetricsPort() int {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.Configuration != nil && c.Configuration.Metrics != nil && c.Configuration.Metrics.Port != 0 {
 		return c.Configuration.Metrics.Port
 	}
@@ -310,14 +325,17 @@ func (c *Config) GetMetricsPort() int {
 }
 
 func (c *Config) GetMetricsBindingIP() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	bindIP := "0.0.0.0"
+
 	if c.Configuration == nil || c.Configuration.Metrics == nil {
 		return bindIP
 	}
 
 	if c.Configuration.Metrics.BindingIPv4 != "" {
 		if bindIP = os.Getenv(c.Configuration.Metrics.BindingIPv4); bindIP != "" {
-			logger.CfgLog.Infof("Parsing ServerIP [%s] from ENV Variable", bindIP)
+			logger.CfgLog.Infof("Parsing ServerIPv4 [%s] from ENV Variable", bindIP)
 		} else {
 			bindIP = c.Configuration.Metrics.BindingIPv4
 		}
@@ -326,18 +344,19 @@ func (c *Config) GetMetricsBindingIP() string {
 }
 
 func (c *Config) GetMetricsBindingAddr() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.GetMetricsBindingIP() + ":" + strconv.Itoa(c.GetMetricsPort())
 }
 
-// We can see if there is a benefit to factor this tls key/pem with the sbi ones
 func (c *Config) GetMetricsCertPemPath() string {
+	// We can see if there is a benefit to factor this tls key/pem with the sbi ones
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
 	if c.Configuration.Metrics != nil && c.Configuration.Metrics.Tls != nil {
 		return c.Configuration.Metrics.Tls.Pem
 	}
-
 	return ""
 }
 
@@ -348,11 +367,12 @@ func (c *Config) GetMetricsCertKeyPath() string {
 	if c.Configuration.Metrics != nil && c.Configuration.Metrics.Tls != nil {
 		return c.Configuration.Metrics.Tls.Key
 	}
-
 	return ""
 }
 
 func (c *Config) GetMetricsNamespace() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.Configuration.Metrics != nil && c.Configuration.Metrics.Namespace != "" {
 		return c.Configuration.Metrics.Namespace
 	}

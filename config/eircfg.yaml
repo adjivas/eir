@@ -5,6 +5,7 @@ info:
 configuration:
   defaultStatus: "WHITELISTED"
   metrics:
+    enable: true
     scheme: http
     bindingIPv4: "127.0.0.1"
     port: 9095

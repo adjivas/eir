@@ -33,17 +33,17 @@ func Init() {
 }
 
 type EIRContext struct {
-	Name            string
-	UriScheme       models.UriScheme
-	RegisterIP      netip.Addr // IP register to NRF
-	BindingIP       netip.Addr
-	SBIPort         int
-	DefaultStatus   string
-	NfService       map[models.ServiceName]models.NrfNfManagementNfService
-	NfId            string
-	NrfUri          string
-	NrfCertPem      string
-	OAuth2Required  bool
+	Name           string
+	UriScheme      models.UriScheme
+	RegisterIP     netip.Addr // IP register to NRF
+	BindingIP      netip.Addr
+	SBIPort        int
+	DefaultStatus  string
+	NfService      map[models.ServiceName]models.NrfNfManagementNfService
+	NfId           string
+	NrfUri         string
+	NrfCertPem     string
+	OAuth2Required bool
 }
 
 type NFContext interface {

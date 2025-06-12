@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"github.com/adjivas/eir/internal/metrics/sbi"
+	"github.com/free5gc/util/metrics/sbi"
 	"github.com/gin-gonic/gin"
 )
 
