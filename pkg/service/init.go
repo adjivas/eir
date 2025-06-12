@@ -10,6 +10,7 @@ import (
 
 	eir_context "github.com/adjivas/eir/internal/context"
 	"github.com/adjivas/eir/internal/logger"
+	business_metrics "github.com/adjivas/eir/internal/metrics/business"
 	"github.com/adjivas/eir/internal/sbi"
 	"github.com/adjivas/eir/internal/sbi/consumer"
 	"github.com/adjivas/eir/internal/sbi/processor"
@@ -17,7 +18,10 @@ import (
 	"github.com/adjivas/eir/pkg/factory"
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/nrf/NFManagement"
+	"github.com/free5gc/util/metrics"
+	"github.com/free5gc/util/metrics/utils"
 	"github.com/free5gc/util/mongoapi"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,11 +31,12 @@ type EirApp struct {
 
 	ctx    context.Context
 	cancel context.CancelFunc
+	wg     sync.WaitGroup
 
-	wg        sync.WaitGroup
-	sbiServer *sbi.Server
-	processor *processor.Processor
-	consumer  *consumer.Consumer
+	processor     *processor.Processor
+	consumer      *consumer.Consumer
+	sbiServer     *sbi.Server
+	metricsServer *metrics.Server
 }
 
 var _ app.App = &EirApp{}
@@ -58,7 +63,43 @@ func NewApp(ctx context.Context, cfg *factory.Config, tlsKeyLogPath string) (*Ei
 
 	eir.sbiServer = sbi.NewServer(eir, tlsKeyLogPath)
 
+	if !cfg.AreMetricsEnabled() {
+		return eir, nil
+	}
+
+	// We launch the server only if the user specified it, but we still defined the metrics to avoid checking if
+	// the metrics are enabled each time the prometheus collector are called.
+	commonMetrics := map[utils.MetricTypeEnabled]bool{utils.SBI: true, utils.NAS: true, utils.NGAP: true}
+	var err error
+	eir.metricsServer, err = metrics.NewServer(getInitMetrics(cfg, commonMetrics, getCustomMetrics(cfg)), tlsKeyLogPath, logger.InitLog)
+	if err != nil {
+		return nil, err
+	}
 	return eir, nil
+}
+
+func getCustomMetrics(cfg *factory.Config) map[utils.MetricTypeEnabled][]prometheus.Collector {
+	customMetrics := make(map[utils.MetricTypeEnabled][]prometheus.Collector)
+
+	business_metrics.EnableEquipmentStatusMetrics()
+	customMetrics[business_metrics.EQUIPEMENT_STATUS_METRICS] = business_metrics.GetEquipmentStatusMetrics(cfg.GetMetricsNamespace())
+
+	return customMetrics
+}
+
+func getInitMetrics(cfg *factory.Config, commonMetrics map[utils.MetricTypeEnabled]bool, customMetrics map[utils.MetricTypeEnabled][]prometheus.Collector) metrics.InitMetrics {
+	metricsInfo := metrics.Metrics{
+		BindingIPv4: cfg.GetMetricsBindingAddr(),
+		Scheme:      cfg.GetMetricsScheme(),
+		Namespace:   cfg.GetMetricsNamespace(),
+		Port:        cfg.GetMetricsPort(),
+		Tls: metrics.Tls{
+			Key: cfg.GetMetricsCertKeyPath(),
+			Pem: cfg.GetMetricsCertPemPath(),
+		},
+	}
+
+	return metrics.NewInitMetrics(metricsInfo, "eir", commonMetrics, customMetrics)
 }
 
 func (a *EirApp) Consumer() *consumer.Consumer {
@@ -176,10 +217,16 @@ func (a *EirApp) Start() {
 		}
 	}()
 
-	logger.InitLog.Infoln("Server started")
+	logger.InitLog.Infoln("Servers started")
 
 	a.wg.Add(1)
 	go a.listenShutdown(a.ctx)
+
+	if a.cfg.AreMetricsEnabled() && a.metricsServer != nil {
+		go func() {
+			a.metricsServer.Run(&a.wg)
+		}()
+	}
 
 	a.sbiServer.Run(&a.wg)
 	a.WaitRoutineStopped()
@@ -205,6 +252,9 @@ func (a *EirApp) terminateProcedure() {
 func (a *EirApp) CallServerStop() {
 	if a.sbiServer != nil {
 		a.sbiServer.Shutdown()
+	}
+	if a.metricsServer != nil {
+		a.metricsServer.Stop()
 	}
 }
 

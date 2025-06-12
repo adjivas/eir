@@ -8,7 +8,7 @@ import (
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
 	"github.com/free5gc/util/mongoapi"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 const (

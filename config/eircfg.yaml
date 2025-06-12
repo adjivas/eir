@@ -3,7 +3,15 @@ info:
   description: EIR initial local configuration
 
 configuration:
-  defaultStatus: "BLACKLISTED"
+  defaultStatus: "WHITELISTED"
+  metrics:
+    enable: true
+    scheme: http
+    bindingIPv4: "127.0.0.1"
+    port: 9095
+    tls:
+      pem: cert/eir.pem
+      key: cert/eir.key
   sbi: # Service-based interface information
     scheme: http # the protocol for sbi (http or https)
     oauth: false
